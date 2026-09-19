@@ -50,7 +50,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* Header */
@@ -756,7 +756,11 @@
         var termo = _acInput.value.trim();
         console.log('INPUT DISPARADO:', termo, '| supabaseClient:', !!supabaseClient);
         if (termo.length < 2) { _acList.classList.remove('show'); _acList.innerHTML = ''; return; }
-        if (!supabaseClient) { console.warn('Supabase nao conectado - autocomplete indisponivel'); return; }
+        if (!supabaseClient) {
+            _acList.innerHTML = '<div class="autocomplete-item" style="color:#f87171">Supabase nao conectado</div>';
+            _acList.classList.add('show');
+            return;
+        }
         _timerAutocomplete = setTimeout(function() {
             console.log('Buscando hospital:', termo);
             supabaseClient.from('hospitais').select('*').ilike('nome', '%' + termo + '%').limit(10)
