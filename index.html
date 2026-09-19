@@ -755,12 +755,21 @@
         _acIndex = -1;
         var termo = _acInput.value.trim();
         if (termo.length < 2) { _acList.classList.remove('show'); _acList.innerHTML = ''; return; }
-        if (!supabaseClient) return;
+        if (!supabaseClient) { console.warn('Supabase nao conectado - autocomplete indisponivel'); return; }
         _timerAutocomplete = setTimeout(function() {
+            console.log('Buscando hospital:', termo);
             supabaseClient.from('hospitais').select('*').ilike('nome', '%' + termo + '%').limit(10)
                 .then(function(result) {
-                    if (result.error || !result.data || result.data.length === 0) {
-                        _acList.classList.remove('show');
+                    console.log('Resultado busca:', result);
+                    if (result.error) {
+                        console.error('Erro query hospitais:', result.error);
+                        _acList.innerHTML = '<div class="autocomplete-item" style="color:#f87171">Erro: ' + result.error.message + '</div>';
+                        _acList.classList.add('show');
+                        return;
+                    }
+                    if (!result.data || result.data.length === 0) {
+                        _acList.innerHTML = '<div class="autocomplete-item" style="color:#64748b">Nenhum hospital encontrado</div>';
+                        _acList.classList.add('show');
                         _acResults = [];
                         return;
                     }
@@ -776,6 +785,11 @@
                         });
                         _acList.appendChild(div);
                     });
+                    _acList.classList.add('show');
+                })
+                .catch(function(err) {
+                    console.error('Excecao busca hospital:', err);
+                    _acList.innerHTML = '<div class="autocomplete-item" style="color:#f87171">Falha na conexao</div>';
                     _acList.classList.add('show');
                 });
         }, 400);
