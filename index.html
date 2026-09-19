@@ -3,291 +3,503 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Informações Gerais - CotMed Pro</title>
-
-    <!-- Tailwind CSS para carregar o visual Dark Premium -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        /* Estilos de segurança para garantir o visual Dark Premium independente do navegador */
-        body { background-color: #020617 !important; color: #f8fafc !important; font-family: sans-serif; }
-        input, select, textarea { background-color: #0f172a !important; color: #ffffff !important; border-color: #334155 !important; }
-        input:focus, select:focus { border-color: #06b6d4 !important; outline: none; }
-        .card-bg { background-color: #0f172a; border: 1px solid #1e293b; }
-        .header-bg { background: linear-gradient(to right, #0f172a, #083344, #0f172a); border-bottom: 1px solid #1e293b; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-body: #020617;
+            --bg-card: #0f172a;
+            --bg-input: #0f172a;
+            --bg-header: linear-gradient(to right, #0f172a, #083344, #0f172a);
+            --border-color: #1e293b;
+            --border-input: #334155;
+            --border-focus: #06b6d4;
+            --text-primary: #f8fafc;
+            --text-label: #94a3b8;
+            --text-label-cyan: #22d3ee;
+            --text-muted: #64748b;
+            --accent-red: #f87171;
+            --accent-amber: #fbbf24;
+            --accent-cyan: #06b6d4;
+            --bg-button-primary: #0891b2;
+            --bg-button-danger: transparent;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-header);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+        .header-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+            text-transform: uppercase;
+        }
+        .header-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        .header-close:hover { color: var(--accent-red); }
+
+        /* Form */
+        form { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Labels */
+        .label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+        .label-cyan { color: var(--text-label-cyan); }
+        .label-slate { color: var(--text-label); }
+        .label-muted { color: var(--text-muted); font-size: 10px; }
+
+        /* Inputs */
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input::placeholder, textarea::placeholder { color: #475569; }
+        input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
+        input[readonly], textarea[readonly] { opacity: 0.5; cursor: default; }
+        select { cursor: pointer; -webkit-appearance: auto; appearance: auto; }
+        textarea { resize: vertical; min-height: 50px; }
+
+        /* Grid system */
+        .row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .row > [class*="col-"] { flex: none; }
+
+        .col-1  { width: calc(8.333% - 11px); }
+        .col-2  { width: calc(16.666% - 10px); }
+        .col-3  { width: calc(25% - 9px); }
+        .col-4  { width: calc(33.333% - 8px); }
+        .col-5  { width: calc(41.666% - 7px); }
+        .col-6  { width: calc(50% - 6px); }
+        .col-7  { width: calc(58.333% - 5px); }
+        .col-8  { width: calc(66.666% - 4px); }
+        .col-9  { width: calc(75% - 3px); }
+        .col-10 { width: calc(83.333% - 2px); }
+        .col-11 { width: calc(91.666% - 1px); }
+        .col-12 { width: 100%; }
+
+        /* Blocks */
+        .block-search {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+            margin-bottom: 0;
+        }
+
+        /* Checkbox label */
+        .check-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            padding-top: 22px;
+            font-size: 12px;
+        }
+        .check-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+        }
+        .check-label.red { color: var(--accent-red); }
+        .check-label.red input[type="checkbox"] { accent-color: var(--accent-red); }
+        .check-label.amber { color: var(--accent-amber); }
+        .check-label.amber input[type="checkbox"] { accent-color: var(--accent-amber); }
+        .check-label.cyan-small { padding-top: 0; font-size: 10px; color: var(--text-label); }
+        .check-label.cyan-small input[type="checkbox"] { accent-color: var(--accent-cyan); width: 14px; height: 14px; }
+
+        /* Flex helpers */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .gap-3 { gap: 12px; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+
+        /* Proposal number */
+        .input-proposta {
+            border-color: #0e7490 !important;
+            background: var(--bg-body) !important;
+            color: var(--accent-cyan) !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.1em;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary {
+            background: var(--bg-button-primary);
+            color: #fff;
+            border: 1px solid #06b6d4;
+            box-shadow: 0 4px 12px rgba(6,182,212,0.25);
+        }
+        .btn-primary:hover { background: #06b6d4; }
+        .btn-danger {
+            background: var(--bg-button-danger);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+        .btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .row > [class*="col-"] { width: 100% !important; }
+            body { padding: 8px; }
+        }
     </style>
 </head>
-<body class="bg-slate-950 p-4 min-h-screen flex items-center justify-center">
+<body>
 
+<div class="container">
 
-    <!-- Container Premium Modernizado (Substitui totalmente o visual antigo) -->
-    <div class="w-full max-w-5xl card-bg rounded-2xl shadow-2xl overflow-hidden">
-        
-        <!-- Header Superior Estilo Software Internacional -->
-        <div class="header-bg px-6 py-4 flex justify-between items-center border-b border-gray-800">
-            <div class="flex items-center space-x-3">
-                <div class="h-3 w-3 rounded-full bg-cyan-400" style="box-shadow: 0 0 10px #06b6d4;"></div>
-                <h1 class="text-sm font-bold tracking-wider text-gray-200 uppercase">Inserir Informações Gerais</h1>
-            </div>
-            <button type="button" class="text-gray-400 hover:text-red-400 text-xl font-bold transition-colors">&times;</button>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-dot"></div>
+            <h1 class="header-title">Inserir Informações Gerais</h1>
         </div>
-
-
-        <!-- Formulário Organizador de Dados -->
-        <form id="formGerais" class="p-6 space-y-5 text-xs font-semibold text-gray-300">
-            
-            <!-- Bloco de Pesquisa Inteligente -->
-            <div class="grid grid-cols-12 gap-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
-                <div class="col-span-3">
-                    <label class="block text-gray-400 mb-1.5 uppercase tracking-wide">Pesquisar por CNPJ</label>
-                    <input type="text" id="busca_cnpj" placeholder="Digite o CNPJ..." class="w-full p-2.5 rounded-lg border bg-slate-900 border-gray-700 text-white uppercase">
-                </div>
-                <div class="col-span-9">
-                    <label class="block text-gray-400 mb-1.5 uppercase tracking-wide">Nome do Hospital Localizado</label>
-                    <input type="text" id="busca_nome_hospital" placeholder="Aguardando busca no banco de dados..." class="w-full p-2.5 rounded-lg border bg-slate-900 border-gray-700 text-gray-400 uppercase" readonly>
-                </div>
-            </div>
-
-
-            <!-- Dados Principais do Hospital -->
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label class="block text-cyan-400 mb-1.5 uppercase tracking-wide">Descrição hospital</label>
-                    <input type="text" id="hospital_nome" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-2 flex items-center justify-center pt-5">
-                    <label class="inline-flex items-center text-red-400 cursor-pointer select-none">
-                        <input type="checkbox" id="sem_hospital" class="rounded border-gray-700 text-red-500 mr-2 h-4 w-4 bg-slate-950"> Sem Hospital
-                    </label>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-cyan-400 mb-1.5 uppercase tracking-wide">Cnpj</label>
-                    <input type="text" id="hospital_cnpj" class="w-full p-2.5 rounded-lg border text-white">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-cyan-400 mb-1.5 uppercase tracking-wide">Telefone</label>
-                    <input type="text" id="hospital_telefone" class="w-full p-2.5 rounded-lg border text-white">
-                </div>
-            </div>
-
-
-            <!-- Endereço Estruturado para o PDF -->
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-4">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Rua / Logradouro</label>
-                    <input type="text" id="hospital_rua" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-1">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Nº</label>
-                    <input type="text" id="hospital_numero" class="w-full p-2.5 rounded-lg border text-white text-center">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Cep</label>
-                    <input type="text" id="hospital_cep" class="w-full p-2.5 rounded-lg border text-white text-center">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Bairro</label>
-                    <input type="text" id="hospital_bairro" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Município</label>
-                    <input type="text" id="hospital_municipio" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-1">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">UF</label>
-                    <input type="text" id="hospital_uf" class="w-full p-2.5 rounded-lg border text-white text-center uppercase max-w-[50px]">
-                </div>
-            </div>
-
-
-            <!-- Bloco do Paciente e do Médico -->
-            <div class="grid grid-cols-12 gap-4 border-t border-gray-800 pt-4">
-                <div class="col-span-5">
-                    <label class="block text-cyan-400 mb-1.5 uppercase tracking-wide">Médico Solicitante 📝</label>
-                    <input type="text" id="medico_nome" placeholder="Nome do profissional de saúde..." class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-5">
-                    <label class="block text-cyan-400 mb-1.5 uppercase tracking-wide">Nome Completo do Paciente</label>
-                    <input type="text" id="paciente_nome" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-2 flex items-center justify-center pt-5">
-                    <label class="inline-flex items-center text-amber-400 cursor-pointer select-none">
-                        <input type="checkbox" id="venda_direta" class="rounded border-gray-700 text-amber-500 mr-2 h-4 w-4 bg-slate-950"> Venda direta
-                    </label>
-                </div>
-            </div>
-
-
-            <!-- Dados Comerciais de Fechamento -->
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-5">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Convênio Responsável</label>
-                    <input type="text" id="convenio_nome" placeholder="Ex: UNIMED, BRADESCO..." class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-3">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Aos Cuidados De (A/C)</label>
-                    <input type="text" id="atencao_de" placeholder="Ex: JULIANA SOUZA" class="w-full p-2.5 rounded-lg border text-white uppercase">
-                </div>
-                <div class="col-span-4">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="text-cyan-400 uppercase tracking-wide">Nº Proposta Gerado</label>
-                        <label class="inline-flex items-center text-gray-400 text-[10px] cursor-pointer select-none">
-                            <input type="checkbox" id="com_observacoes" checked class="rounded border-gray-700 mr-1.5 h-3.5 w-3.5 bg-slate-950"> Adicionar Obs.
-                        </label>
-                    </div>
-                    <input type="text" id="numero_proposta" class="w-full p-2.5 rounded-lg border border-cyan-800 bg-slate-950 text-cyan-400 font-mono text-sm tracking-wider font-bold" readonly>
-                </div>
-            </div>
-
-
-            <!-- Caixa de Texto Observações -->
-            <div id="wrapper_observacoes" class="w-full">
-                <label class="block text-gray-400 mb-1.5 uppercase tracking-wide">Observações da Proposta:</label>
-                <textarea id="observacoes" rows="2" class="w-full p-2.5 rounded-lg border text-white uppercase"></textarea>
-            </div>
-
-
-            <!-- Rodapé e Condições de Prazo -->
-            <div class="grid grid-cols-12 gap-4 border-t border-gray-800 pt-4 items-end">
-                <div class="col-span-3">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Prazo de entrega</label>
-                    <select id="prazo_entrega" class="w-full p-2.5 rounded-lg border text-white">
-                        <option>Imediato</option>
-                        <option>24 Horas</option>
-                        <option>48 Horas</option>
-                    </select>
-                </div>
-                <div class="col-span-3">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Prazo de pagamento</label>
-                    <select id="prazo_pagamento" class="w-full p-2.5 rounded-lg border text-white">
-                        <option>30 (Trinta) Dias</option>
-                        <option>60 (Sessenta) Dias</option>
-                        <option>À Vista</option>
-                    </select>
-                </div>
-                <div class="col-span-3">
-                    <label class="block text-slate-400 mb-1.5 uppercase tracking-wide">Prazo da proposta</label>
-                    <select id="validade_proposta" class="w-full p-2.5 rounded-lg border text-white">
-                        <option>10 (Dez) Dias</option>
-                        <option>15 (Quinze) Dias</option>
-                        <option>30 (Trinta) Dias</option>
-                    </select>
-                </div>
-                <div class="col-span-3 flex justify-end gap-2">
-                    <button type="button" id="btnLimpar" class="px-5 py-2 rounded-lg border border-red-500 text-red-400 bg-slate-950 hover:bg-red-950/50 uppercase font-bold tracking-wide transition-colors">Limpar</button>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-cyan-600 border border-cyan-500 text-white hover:bg-cyan-500 uppercase font-bold tracking-wide shadow-lg transition-colors">Próximo</button>
-                </div>
-            </div>
-        </form>
+        <button type="button" class="header-close">&times;</button>
     </div>
 
+    <!-- Formulário -->
+    <form id="formGerais">
 
-    <!-- Script de Integração e Inteligência de Negócio -->
-    <script>
-        // Configurações Iniciais do Supabase (Substitua pelas suas chaves do painel gratuito do Supabase)
-        const SUPABASE_URL = "SUA_URL_DO_SUPABASE";
-        const SUPABASE_ANON_KEY = "SUA_CHAVE_ANON_PUBLICA";
+        <!-- Busca CNPJ -->
+        <div class="block-search">
+            <div class="row">
+                <div class="col-3">
+                    <label class="label label-slate">Pesquisar por CNPJ</label>
+                    <input type="text" id="busca_cnpj" placeholder="Digite o CNPJ...">
+                </div>
+                <div class="col-9">
+                    <label class="label label-slate">Nome do Hospital Localizado</label>
+                    <input type="text" id="busca_nome_hospital" placeholder="Aguardando busca no banco de dados..." readonly style="color: var(--text-muted);">
+                </div>
+            </div>
+        </div>
 
-        // ---- Controle da caixa de Observações (checkbox "Adicionar Obs.") ----
-        const checkboxObs = document.getElementById('com_observacoes');
-        const wrapperObs = document.getElementById('wrapper_observacoes');
-        function atualizarVisibilidadeObs() {
-            wrapperObs.style.display = checkboxObs.checked ? 'block' : 'none';
-        }
-        checkboxObs.addEventListener('change', atualizarVisibilidadeObs);
-        atualizarVisibilidadeObs();
+        <!-- Dados do Hospital -->
+        <div class="row">
+            <div class="col-5">
+                <label class="label label-cyan">Descrição Hospital</label>
+                <input type="text" id="hospital_nome">
+            </div>
+            <div class="col-2">
+                <label class="check-label red">
+                    <input type="checkbox" id="sem_hospital"> Sem Hospital
+                </label>
+            </div>
+            <div class="col-2">
+                <label class="label label-cyan">CNPJ</label>
+                <input type="text" id="hospital_cnpj">
+            </div>
+            <div class="col-3">
+                <label class="label label-cyan">Telefone</label>
+                <input type="text" id="hospital_telefone">
+            </div>
+        </div>
 
-        // ---- Controle "Sem Hospital" (bloqueia e limpa os dados do hospital) ----
-        const checkboxSemHospital = document.getElementById('sem_hospital');
-        const camposHospital = ['hospital_nome','hospital_cnpj','hospital_telefone','hospital_rua','hospital_numero','hospital_cep','hospital_bairro','hospital_municipio','hospital_uf'];
-        checkboxSemHospital.addEventListener('change', () => {
-            camposHospital.forEach(id => {
-                const el = document.getElementById(id);
-                el.readOnly = checkboxSemHospital.checked;
-                el.classList.toggle('opacity-40', checkboxSemHospital.checked);
-            });
-            if (checkboxSemHospital.checked) {
-                camposHospital.forEach(id => document.getElementById(id).value = '');
-            }
+        <!-- Endereço -->
+        <div class="row">
+            <div class="col-4">
+                <label class="label label-slate">Rua / Logradouro</label>
+                <input type="text" id="hospital_rua">
+            </div>
+            <div class="col-1">
+                <label class="label label-slate">Nº</label>
+                <input type="text" id="hospital_numero" style="text-align:center;">
+            </div>
+            <div class="col-2">
+                <label class="label label-slate">CEP</label>
+                <input type="text" id="hospital_cep" style="text-align:center;">
+            </div>
+            <div class="col-2">
+                <label class="label label-slate">Bairro</label>
+                <input type="text" id="hospital_bairro">
+            </div>
+            <div class="col-2">
+                <label class="label label-slate">Município</label>
+                <input type="text" id="hospital_municipio">
+            </div>
+            <div class="col-1">
+                <label class="label label-slate">UF</label>
+                <input type="text" id="hospital_uf" style="text-align:center; max-width:50px;">
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Médico / Paciente -->
+        <div class="row">
+            <div class="col-4">
+                <label class="label label-cyan">Médico Solicitante &#x1f4dd;</label>
+                <input type="text" id="medico_nome" placeholder="Nome do profissional de saúde...">
+            </div>
+            <div class="col-5">
+                <label class="label label-cyan">Nome Completo do Paciente</label>
+                <input type="text" id="paciente_nome">
+            </div>
+            <div class="col-3">
+                <label class="check-label amber">
+                    <input type="checkbox" id="venda_direta"> Venda direta
+                </label>
+            </div>
+        </div>
+
+        <!-- Dados Comerciais -->
+        <div class="row">
+            <div class="col-4">
+                <label class="label label-slate">Convênio Responsável</label>
+                <input type="text" id="convenio_nome" placeholder="Ex: UNIMED, BRADESCO...">
+            </div>
+            <div class="col-3">
+                <label class="label label-slate">Aos Cuidados De (A/C)</label>
+                <input type="text" id="atencao_de" placeholder="Ex: JULIANA SOUZA">
+            </div>
+            <div class="col-5">
+                <div class="flex justify-between items-center">
+                    <label class="label label-cyan" style="margin-bottom:6px;">Nº Proposta Gerado</label>
+                    <label class="check-label cyan-small">
+                        <input type="checkbox" id="com_observacoes" checked> Adicionar Obs.
+                    </label>
+                </div>
+                <input type="text" id="numero_proposta" class="input-proposta" readonly>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        <div id="wrapper_observacoes">
+            <label class="label label-slate">Observações da Proposta:</label>
+            <textarea id="observacoes" rows="2"></textarea>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Prazos e Botões -->
+        <div class="row" style="align-items: flex-end;">
+            <div class="col-3">
+                <label class="label label-slate">Prazo de entrega</label>
+                <select id="prazo_entrega">
+                    <option>Imediato</option>
+                    <option>24 Horas</option>
+                    <option>48 Horas</option>
+                </select>
+            </div>
+            <div class="col-3">
+                <label class="label label-slate">Prazo de pagamento</label>
+                <select id="prazo_pagamento">
+                    <option>30 (Trinta) Dias</option>
+                    <option>60 (Sessenta) Dias</option>
+                    <option>À Vista</option>
+                </select>
+            </div>
+            <div class="col-3">
+                <label class="label label-slate">Prazo da proposta</label>
+                <select id="validade_proposta">
+                    <option>10 (Dez) Dias</option>
+                    <option>15 (Quinze) Dias</option>
+                    <option>30 (Trinta) Dias</option>
+                </select>
+            </div>
+            <div class="col-3" style="text-align:right;">
+                <div class="flex justify-end gap-2" style="padding-top:22px;">
+                    <button type="button" id="btnLimpar" class="btn btn-danger">Limpar</button>
+                    <button type="submit" class="btn btn-primary">Próximo</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    const SUPABASE_URL = "SUA_URL_DO_SUPABASE";
+    const SUPABASE_ANON_KEY = "SUA_CHAVE_ANON_PUBLICA";
+
+    const checkboxObs = document.getElementById('com_observacoes');
+    const wrapperObs = document.getElementById('wrapper_observacoes');
+    function atualizarVisibilidadeObs() {
+        wrapperObs.style.display = checkboxObs.checked ? 'block' : 'none';
+    }
+    checkboxObs.addEventListener('change', atualizarVisibilidadeObs);
+    atualizarVisibilidadeObs();
+
+    const checkboxSemHospital = document.getElementById('sem_hospital');
+    const camposHospital = ['hospital_nome','hospital_cnpj','hospital_telefone','hospital_rua','hospital_numero','hospital_cep','hospital_bairro','hospital_municipio','hospital_uf'];
+    checkboxSemHospital.addEventListener('change', () => {
+        camposHospital.forEach(id => {
+            const el = document.getElementById(id);
+            el.readOnly = checkboxSemHospital.checked;
+            el.style.opacity = checkboxSemHospital.checked ? '0.4' : '1';
         });
-
-        // ---- Geração automática do Nº da Proposta ----
-        function gerarNumeroProposta() {
-            const agora = new Date();
-            const data = agora.toISOString().slice(0, 10).replace(/-/g, '');
-            const aleatorio = Math.floor(1000 + Math.random() * 9000);
-            return 'PH-' + data + '-' + aleatorio;
+        if (checkboxSemHospital.checked) {
+            camposHospital.forEach(id => document.getElementById(id).value = '');
         }
+    });
+
+    function gerarNumeroProposta() {
+        const agora = new Date();
+        const data = agora.toISOString().slice(0, 10).replace(/-/g, '');
+        const aleatorio = Math.floor(1000 + Math.random() * 9000);
+        return 'PH-' + data + '-' + aleatorio;
+    }
+    document.getElementById('numero_proposta').value = gerarNumeroProposta();
+
+    const bancoHospitais = [
+        { cnpj: '00000000000000', nome: 'CENTRO HOSPITALAR ALBERT SABIN', rua: 'RUA DAS FLORES', numero: '100', cep: '40000-000', bairro: 'CENTRO', municipio: 'SALVADOR', uf: 'BA', telefone: '(71) 3333-3333' }
+    ];
+    document.getElementById('busca_cnpj').addEventListener('change', (e) => {
+        const cnpj = e.target.value.replace(/\D/g, '');
+        const encontrado = bancoHospitais.find(h => h.cnpj === cnpj);
+        const campoNome = document.getElementById('busca_nome_hospital');
+        if (encontrado) {
+            campoNome.value = encontrado.nome;
+            document.getElementById('hospital_nome').value = encontrado.nome;
+            document.getElementById('hospital_cnpj').value = e.target.value;
+            document.getElementById('hospital_telefone').value = encontrado.telefone;
+            document.getElementById('hospital_rua').value = encontrado.rua;
+            document.getElementById('hospital_numero').value = encontrado.numero;
+            document.getElementById('hospital_cep').value = encontrado.cep;
+            document.getElementById('hospital_bairro').value = encontrado.bairro;
+            document.getElementById('hospital_municipio').value = encontrado.municipio;
+            document.getElementById('hospital_uf').value = encontrado.uf;
+        } else if (cnpj) {
+            campoNome.value = 'CNPJ NÃO LOCALIZADO (CADASTRE MANUALMENTE)';
+        } else {
+            campoNome.value = '';
+        }
+    });
+
+    document.getElementById('btnLimpar').addEventListener('click', () => {
+        document.getElementById('formGerais').reset();
+        checkboxSemHospital.checked = false;
+        camposHospital.forEach(id => {
+            const el = document.getElementById(id);
+            el.readOnly = false;
+            el.style.opacity = '1';
+        });
         document.getElementById('numero_proposta').value = gerarNumeroProposta();
+        atualizarVisibilidadeObs();
+    });
 
-        // ---- Busca por CNPJ (base local simulada enquanto conecta ao Supabase) ----
-        const bancoHospitais = [
-            { cnpj: '00000000000000', nome: 'CENTRO HOSPITALAR ALBERT SABIN', rua: 'RUA DAS FLORES', numero: '100', cep: '40000-000', bairro: 'CENTRO', municipio: 'SALVADOR', uf: 'BA', telefone: '(71) 3333-3333' }
-        ];
-        document.getElementById('busca_cnpj').addEventListener('change', (e) => {
-            const cnpj = e.target.value.replace(/\D/g, '');
-            const encontrado = bancoHospitais.find(h => h.cnpj === cnpj);
-            const campoNome = document.getElementById('busca_nome_hospital');
-            if (encontrado) {
-                campoNome.value = encontrado.nome;
-                document.getElementById('hospital_nome').value = encontrado.nome;
-                document.getElementById('hospital_cnpj').value = e.target.value;
-                document.getElementById('hospital_telefone').value = encontrado.telefone;
-                document.getElementById('hospital_rua').value = encontrado.rua;
-                document.getElementById('hospital_numero').value = encontrado.numero;
-                document.getElementById('hospital_cep').value = encontrado.cep;
-                document.getElementById('hospital_bairro').value = encontrado.bairro;
-                document.getElementById('hospital_municipio').value = encontrado.municipio;
-                document.getElementById('hospital_uf').value = encontrado.uf;
-            } else if (cnpj) {
-                campoNome.value = 'CNPJ NÃO LOCALIZADO NO BANCO (CADASTRE MANUALMENTE)';
-            } else {
-                campoNome.value = '';
-            }
-        });
-
-        // ---- Botão Limpar ----
-        document.getElementById('btnLimpar').addEventListener('click', () => {
-            document.getElementById('formGerais').reset();
-            checkboxSemHospital.checked = false;
-            camposHospital.forEach(id => {
-                const el = document.getElementById(id);
-                el.readOnly = false;
-                el.classList.remove('opacity-40');
-            });
-            document.getElementById('numero_proposta').value = gerarNumeroProposta();
-            atualizarVisibilidadeObs();
-        });
-
-        // ---- Salvar capa da proposta e avançar ----
-        document.getElementById('formGerais').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const capa = {
-                numero_proposta: document.getElementById('numero_proposta').value,
-                sem_hospital: checkboxSemHospital.checked,
-                hospital_nome: document.getElementById('hospital_nome').value,
-                hospital_cnpj: document.getElementById('hospital_cnpj').value,
-                hospital_telefone: document.getElementById('hospital_telefone').value,
-                hospital_rua: document.getElementById('hospital_rua').value,
-                hospital_numero: document.getElementById('hospital_numero').value,
-                hospital_cep: document.getElementById('hospital_cep').value,
-                hospital_bairro: document.getElementById('hospital_bairro').value,
-                hospital_municipio: document.getElementById('hospital_municipio').value,
-                hospital_uf: document.getElementById('hospital_uf').value,
-                medico_nome: document.getElementById('medico_nome').value,
-                paciente_nome: document.getElementById('paciente_nome').value,
-                venda_direta: document.getElementById('venda_direta').checked,
-                convenio_nome: document.getElementById('convenio_nome').value,
-                atencao_de: document.getElementById('atencao_de').value,
-                com_observacoes: checkboxObs.checked,
-                observacoes: document.getElementById('observacoes').value,
-                prazo_entrega: document.getElementById('prazo_entrega').value,
-                prazo_pagamento: document.getElementById('prazo_pagamento').value,
-                validade_proposta: document.getElementById('validade_proposta').value,
-                criado_em: new Date().toISOString()
-            };
-            localStorage.setItem('proposta_atual_capa', JSON.stringify(capa));
-            alert('Proposta ' + capa.numero_proposta + ' salva com sucesso!');
-        });
-    </script>
+    document.getElementById('formGerais').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const capa = {
+            numero_proposta: document.getElementById('numero_proposta').value,
+            sem_hospital: checkboxSemHospital.checked,
+            hospital_nome: document.getElementById('hospital_nome').value,
+            hospital_cnpj: document.getElementById('hospital_cnpj').value,
+            hospital_telefone: document.getElementById('hospital_telefone').value,
+            hospital_rua: document.getElementById('hospital_rua').value,
+            hospital_numero: document.getElementById('hospital_numero').value,
+            hospital_cep: document.getElementById('hospital_cep').value,
+            hospital_bairro: document.getElementById('hospital_bairro').value,
+            hospital_municipio: document.getElementById('hospital_municipio').value,
+            hospital_uf: document.getElementById('hospital_uf').value,
+            medico_nome: document.getElementById('medico_nome').value,
+            paciente_nome: document.getElementById('paciente_nome').value,
+            venda_direta: document.getElementById('venda_direta').checked,
+            convenio_nome: document.getElementById('convenio_nome').value,
+            atencao_de: document.getElementById('atencao_de').value,
+            com_observacoes: checkboxObs.checked,
+            observacoes: document.getElementById('observacoes').value,
+            prazo_entrega: document.getElementById('prazo_entrega').value,
+            prazo_pagamento: document.getElementById('prazo_pagamento').value,
+            validade_proposta: document.getElementById('validade_proposta').value,
+            criado_em: new Date().toISOString()
+        };
+        localStorage.setItem('proposta_atual_capa', JSON.stringify(capa));
+        alert('Proposta ' + capa.numero_proposta + ' salva com sucesso!');
+    });
+</script>
 </body>
 </html>
