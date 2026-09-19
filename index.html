@@ -673,13 +673,16 @@
     });
 
     // ========== BUSCA CNPJ PRINCIPAL POR API (BrasilAPI) ==========
-    document.getElementById('busca_cnpj').addEventListener('change', function(e) {
+    document.getElementById('busca_cnpj').addEventListener('blur', function(e) {
         var cnpj = e.target.value.replace(/\D/g, '');
         var campoNome = document.getElementById('busca_nome_hospital');
         if (!cnpj || cnpj.length !== 14) { campoNome.value = ''; return; }
         campoNome.value = 'Buscando...';
         fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
-            .then(function(r) { return r.json(); })
+            .then(function(r) {
+                if (!r.ok) throw new Error('CNPJ nao encontrado');
+                return r.json();
+            })
             .then(function(d) {
                 campoNome.value = d.nome_fantasia || d.razao_social || d.nome || '';
                 document.getElementById('hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
@@ -693,8 +696,8 @@
                 document.getElementById('hospital_uf').value = d.uf || '';
             })
             .catch(function(err) {
-                campoNome.value = 'ERRO AO BUSCAR CNPJ';
-                console.error(err);
+                campoNome.value = 'CNPJ NAO ENCONTRADO (CADASTRE MANUALMENTE)';
+                console.error('Erro BrasilAPI:', err);
             });
     });
 
