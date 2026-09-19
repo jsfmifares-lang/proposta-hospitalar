@@ -651,22 +651,51 @@
         console.error('Erro ao criar cliente Supabase:', err);
     }
 
-    // ========== BUSCA CNPJ DO HOSPITAL NO MODAL ==========
+    // ========== BUSCA CNPJ POR API (BrasilAPI) ==========
     document.getElementById('modal_hospital_cnpj').addEventListener('change', function(e) {
         var cnpj = e.target.value.replace(/\D/g, '');
-        if (!cnpj || !supabaseClient) return;
-        supabaseClient.from('hospitais').select('*').eq('cnpj', cnpj).single().then(function(result) {
-            if (result.data) {
-                document.getElementById('modal_hospital_nome').value = result.data.nome || '';
-                document.getElementById('modal_hospital_telefone').value = result.data.telefone || '';
-                document.getElementById('modal_hospital_rua').value = result.data.rua || '';
-                document.getElementById('modal_hospital_numero').value = result.data.numero || '';
-                document.getElementById('modal_hospital_cep').value = result.data.cep || '';
-                document.getElementById('modal_hospital_bairro').value = result.data.bairro || '';
-                document.getElementById('modal_hospital_municipio').value = result.data.municipio || '';
-                document.getElementById('modal_hospital_uf').value = result.data.uf || '';
-            }
-        });
+        if (!cnpj || cnpj.length !== 14) return;
+        fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
+            .then(function(r) { return r.json(); })
+            .then(function(dados) {
+                document.getElementById('modal_hospital_nome').value = dados.nome || '';
+                document.getElementById('modal_hospital_telefone').value = dados.telefone || '';
+                document.getElementById('modal_hospital_rua').value = dados.logradouro || '';
+                document.getElementById('modal_hospital_numero').value = dados.numero || '';
+                document.getElementById('modal_hospital_cep').value = dados.cep || '';
+                document.getElementById('modal_hospital_bairro').value = dados.bairro || '';
+                document.getElementById('modal_hospital_municipio').value = dados.municipio || '';
+                document.getElementById('modal_hospital_uf').value = dados.uf || '';
+            })
+            .catch(function(err) {
+                console.error('Erro na busca CNPJ:', err);
+            });
+    });
+
+    // ========== BUSCA CNPJ PRINCIPAL POR API (BrasilAPI) ==========
+    document.getElementById('busca_cnpj').addEventListener('change', function(e) {
+        var cnpj = e.target.value.replace(/\D/g, '');
+        var campoNome = document.getElementById('busca_nome_hospital');
+        if (!cnpj || cnpj.length !== 14) { campoNome.value = ''; return; }
+        campoNome.value = 'Buscando...';
+        fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
+            .then(function(r) { return r.json(); })
+            .then(function(dados) {
+                campoNome.value = dados.nome || '';
+                document.getElementById('hospital_nome').value = dados.nome || '';
+                document.getElementById('hospital_cnpj').value = e.target.value;
+                document.getElementById('hospital_telefone').value = dados.telefone || '';
+                document.getElementById('hospital_rua').value = dados.logradouro || '';
+                document.getElementById('hospital_numero').value = dados.numero || '';
+                document.getElementById('hospital_cep').value = dados.cep || '';
+                document.getElementById('hospital_bairro').value = dados.bairro || '';
+                document.getElementById('hospital_municipio').value = dados.municipio || '';
+                document.getElementById('hospital_uf').value = dados.uf || '';
+            })
+            .catch(function(err) {
+                campoNome.value = 'ERRO AO BUSCAR CNPJ';
+                console.error(err);
+            });
     });
 
     // ========== OBSERVAÇÕES ==========
