@@ -1,0 +1,518 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Materiais - CotMed Pro</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-body: #020617;
+            --bg-card: #0f172a;
+            --bg-input: #0f172a;
+            --bg-input-readonly: rgba(15,23,42,0.5);
+            --bg-header: linear-gradient(to right, #0f172a, #083344, #0f172a);
+            --border-color: #1e293b;
+            --border-input: #334155;
+            --border-focus: #06b6d4;
+            --text-primary: #f8fafc;
+            --text-label: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --bg-cyan: #0891b2;
+            --bg-emerald: #059669;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1024px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-header);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .header-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+            text-transform: uppercase;
+        }
+        .header-badge {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-badge span { color: var(--text-muted); }
+
+        /* Form */
+        .form-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* Labels */
+        .label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-label); }
+
+        /* Inputs */
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 9px 12px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input::placeholder { color: #475569; }
+        input:focus, select:focus { border-color: var(--border-focus); }
+        input[readonly] { opacity: 0.5; cursor: default; background: var(--bg-input-readonly); }
+        input.text-right { text-align: right; }
+        input.text-center { text-align: center; }
+        input.text-mono { font-family: 'Courier New', Courier, monospace; }
+        input.text-emerald { color: var(--accent-emerald); }
+        select { cursor: pointer; -webkit-appearance: auto; appearance: auto; }
+
+        /* Grid */
+        .row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .col-2  { width: calc(16.666% - 10px); }
+        .col-3  { width: calc(25% - 9px); }
+        .col-5  { width: calc(41.666% - 7px); }
+        .col-6  { width: calc(50% - 6px); }
+        .col-9  { width: calc(75% - 3px); }
+        .col-10 { width: calc(83.333% - 2px); }
+        .col-12 { width: 100%; }
+
+        /* Block */
+        .block-material {
+            background: rgba(0,0,0,0.3);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(30,41,59,0.8);
+        }
+
+        /* Summary bar */
+        .summary-bar {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .summary-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        .summary-extenso {
+            font-size: 11px;
+            font-style: italic;
+            color: rgba(6,182,212,0.85);
+            font-weight: 500;
+        }
+        .summary-valor-box {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(5,150,105,0.3);
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+        }
+        .summary-valor {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-emerald);
+        }
+
+        /* Table */
+        .table-wrap {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        thead tr {
+            background: rgba(0,0,0,0.4);
+            color: var(--text-label);
+            text-transform: uppercase;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            padding: 10px 12px;
+            text-align: left;
+        }
+        th.text-center { text-align: center; }
+        th.text-right { text-align: right; }
+        th.w-12 { width: 48px; }
+        tbody tr {
+            background: rgba(15,23,42,0.5);
+            border-bottom: 1px solid rgba(30,41,59,0.6);
+        }
+        tbody td {
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        tbody td.text-center { text-align: center; }
+        tbody td.text-right { text-align: right; font-family: 'Courier New', Courier, monospace; }
+        .empty-row td {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-cyan {
+            background: var(--bg-cyan);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(6,182,212,0.25);
+        }
+        .btn-cyan:hover { background: var(--accent-cyan); }
+        .btn-emerald {
+            background: var(--bg-emerald);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.25);
+        }
+        .btn-emerald:hover { background: var(--accent-emerald); }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.15s;
+            line-height: 1;
+        }
+        .btn-delete:hover { background: rgba(239,68,68,0.15); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .row > [class*="col-"] { width: 100% !important; }
+            body { padding: 8px; }
+            .summary-bar { flex-direction: column; gap: 12px; text-align: center; }
+            .header { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-dot"></div>
+            <h1 class="header-title">Inserir Itens da Proposta</h1>
+        </div>
+        <div class="header-badge">
+            <span>Nº Pedido:</span>
+            <span id="label_numero_pedido">----------</span>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-body">
+
+        <!-- Seleção de Material -->
+        <div class="block-material">
+            <div class="row">
+                <div class="col-3">
+                    <label class="label">Referência</label>
+                    <input type="text" id="material_ref" placeholder="Digite a referência...">
+                </div>
+                <div class="col-6">
+                    <label class="label">Descrição do Material</label>
+                    <input type="text" id="material_desc" placeholder="Nome ou especificação do material médico...">
+                </div>
+                <div class="col-3">
+                    <label class="label">Fabricante</label>
+                    <input type="text" id="material_fab" placeholder="Ex: Johnson & Johnson">
+                </div>
+            </div>
+        </div>
+
+        <!-- Valores e Métricas -->
+        <div class="row">
+            <div class="col-2">
+                <label class="label">Quantidade</label>
+                <input type="number" id="material_qtd" value="1" min="1" class="text-center">
+            </div>
+            <div class="col-2">
+                <label class="label">Unidade</label>
+                <select id="material_uni">
+                    <option>UNIDADE</option>
+                    <option>CAIXA</option>
+                    <option>PACOTE</option>
+                    <option>KIT</option>
+                </select>
+            </div>
+            <div class="col-2">
+                <label class="label">Valor Unitário (R$)</label>
+                <input type="number" step="0.01" id="material_v_unit" placeholder="0.00" class="text-right text-mono text-emerald">
+            </div>
+            <div class="col-2">
+                <label class="label">Sub-total</label>
+                <input type="text" id="material_subtotal" class="text-right text-mono" readonly value="R$ 0,00">
+            </div>
+            <div class="col-2">
+                <label class="label">Registro ANVISA</label>
+                <input type="text" id="material_anvisa" placeholder="Ex: 10234567890" class="text-center text-mono">
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div style="display:flex; gap:12px;">
+            <button type="button" id="btn_inserir" class="btn btn-cyan">Adicionar Item</button>
+            <button type="button" id="btn_salvar_tudo" class="btn btn-emerald">Gravar Proposta e Avançar</button>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="summary-bar">
+            <div>
+                <div class="summary-label">Valor Total Acumulado</div>
+                <div class="summary-extenso" id="proposta_total_extenso">( zero reais )</div>
+            </div>
+            <div class="summary-valor-box">
+                <span class="summary-valor" id="proposta_total_num">R$ 0,00</span>
+            </div>
+        </div>
+
+        <!-- Tabela de Itens -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center w-12">#</th>
+                        <th>Ref</th>
+                        <th>Descrição</th>
+                        <th>Fabricante</th>
+                        <th class="text-center">Qtd</th>
+                        <th>Unid</th>
+                        <th class="text-right">Unitário</th>
+                        <th class="text-right">Subtotal</th>
+                        <th class="text-center w-12"></th>
+                    </tr>
+                </thead>
+                <tbody id="tabela_itens_corpo">
+                    <tr class="empty-row">
+                        <td colspan="9">Nenhum material inserido na lista ainda.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Recupera os dados da capa (tela index.html)
+    const dadosCapa = JSON.parse(localStorage.getItem('proposta_atual_capa') || '{}');
+    if (dadosCapa.numero_proposta) {
+        document.getElementById('label_numero_pedido').innerText = dadosCapa.numero_proposta;
+    } else {
+        alert("Atenção: Dados da capa não encontrados. Volte para a primeira tela.");
+        window.location.href = 'index.html';
+    }
+
+    // Vetor de itens
+    let itensDaProposta = [];
+
+    // Elementos
+    const inputQtd = document.getElementById('material_qtd');
+    const inputUnit = document.getElementById('material_v_unit');
+    const inputSub = document.getElementById('material_subtotal');
+
+    // Calcula subtotal em tempo real
+    function recalcularSubtotalItem() {
+        const qtd = parseInt(inputQtd.value) || 0;
+        const unit = parseFloat(inputUnit.value) || 0;
+        const sub = qtd * unit;
+        inputSub.value = sub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    inputQtd.addEventListener('input', recalcularSubtotalItem);
+    inputUnit.addEventListener('input', recalcularSubtotalItem);
+
+    // Conversor simplificado de valor por extenso
+    function valorPorExtenso(valor) {
+        if (valor === 0) return '( zero reais )';
+        const extenso = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        return '( ' + extenso + ' )';
+    }
+
+    // Atualiza totais gerais
+    function atualizarTotaisGerais() {
+        let total = 0;
+        itensDaProposta.forEach(item => total += item.subtotal);
+        document.getElementById('proposta_total_num').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        document.getElementById('proposta_total_extenso').innerText = valorPorExtenso(total);
+    }
+
+    // Renderiza a tabela
+    function renderizarTabela() {
+        const corpo = document.getElementById('tabela_itens_corpo');
+        if (itensDaProposta.length === 0) {
+            corpo.innerHTML = '<tr class="empty-row"><td colspan="9">Nenhum material inserido na lista ainda.</td></tr>';
+            return;
+        }
+        corpo.innerHTML = '';
+        itensDaProposta.forEach((item, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td class="text-center">' + (i + 1) + '</td>' +
+                '<td>' + item.ref + '</td>' +
+                '<td>' + item.desc + '</td>' +
+                '<td>' + item.fab + '</td>' +
+                '<td class="text-center">' + item.qtd + '</td>' +
+                '<td>' + item.uni + '</td>' +
+                '<td class="text-right">' + item.vUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '</td>' +
+                '<td class="text-right">' + item.subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '</td>' +
+                '<td class="text-center"><button class="btn-delete" data-index="' + i + '">&times;</button></td>';
+            corpo.appendChild(tr);
+        });
+
+        // Deleta item
+        corpo.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.getAttribute('data-index'));
+                itensDaProposta.splice(idx, 1);
+                renderizarTabela();
+                atualizarTotaisGerais();
+            });
+        });
+    }
+
+    // Adiciona item
+    document.getElementById('btn_inserir').addEventListener('click', () => {
+        const ref = document.getElementById('material_ref').value.trim();
+        const desc = document.getElementById('material_desc').value.trim();
+        const fab = document.getElementById('material_fab').value.trim();
+        const qtd = parseInt(inputQtd.value) || 0;
+        const uni = document.getElementById('material_uni').value;
+        const vUnit = parseFloat(inputUnit.value) || 0;
+        const anvisa = document.getElementById('material_anvisa').value.trim();
+
+        if (!desc) { alert('Preencha a descrição do material.'); return; }
+        if (qtd <= 0) { alert('Quantidade deve ser maior que zero.'); return; }
+        if (vUnit <= 0) { alert('Informe o valor unitário.'); return; }
+
+        const subtotal = qtd * vUnit;
+        itensDaProposta.push({ ref, desc, fab, qtd, uni, vUnit, subtotal, anvisa });
+
+        // Limpa campos
+        document.getElementById('material_ref').value = '';
+        document.getElementById('material_desc').value = '';
+        document.getElementById('material_fab').value = '';
+        inputQtd.value = 1;
+        inputUnit.value = '';
+        inputSub.value = 'R$ 0,00';
+        document.getElementById('material_anvisa').value = '';
+
+        renderizarTabela();
+        atualizarTotaisGerais();
+    });
+
+    // Salva tudo
+    document.getElementById('btn_salvar_tudo').addEventListener('click', () => {
+        if (itensDaProposta.length === 0) {
+            alert('Adicione pelo menos um item antes de gravar.');
+            return;
+        }
+        let total = 0;
+        itensDaProposta.forEach(item => total += item.subtotal);
+        const propostaCompleta = {
+            capa: dadosCapa,
+            itens: itensDaProposta,
+            total: total,
+            gravado_em: new Date().toISOString()
+        };
+        localStorage.setItem('proposta_completa', JSON.stringify(propostaCompleta));
+        alert('Proposta ' + dadosCapa.numero_proposta + ' gravada com sucesso!\nTotal: ' + total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+    });
+</script>
+</body>
+</html>
