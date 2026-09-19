@@ -651,6 +651,24 @@
         console.error('Erro ao criar cliente Supabase:', err);
     }
 
+    // ========== BUSCA CNPJ DO HOSPITAL NO MODAL ==========
+    document.getElementById('modal_hospital_cnpj').addEventListener('change', function(e) {
+        var cnpj = e.target.value.replace(/\D/g, '');
+        if (!cnpj || !supabaseClient) return;
+        supabaseClient.from('hospitais').select('*').eq('cnpj', cnpj).single().then(function(result) {
+            if (result.data) {
+                document.getElementById('modal_hospital_nome').value = result.data.nome || '';
+                document.getElementById('modal_hospital_telefone').value = result.data.telefone || '';
+                document.getElementById('modal_hospital_rua').value = result.data.rua || '';
+                document.getElementById('modal_hospital_numero').value = result.data.numero || '';
+                document.getElementById('modal_hospital_cep').value = result.data.cep || '';
+                document.getElementById('modal_hospital_bairro').value = result.data.bairro || '';
+                document.getElementById('modal_hospital_municipio').value = result.data.municipio || '';
+                document.getElementById('modal_hospital_uf').value = result.data.uf || '';
+            }
+        });
+    });
+
     // ========== OBSERVAÇÕES ==========
     var checkboxObs = document.getElementById('com_observacoes');
     var wrapperObs = document.getElementById('wrapper_observacoes');
