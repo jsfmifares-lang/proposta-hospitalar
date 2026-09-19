@@ -685,54 +685,41 @@
         _timerModalCNPJ = setTimeout(function() {
             var cnpj = e.target.value.replace(/\D/g, '');
             if (!cnpj || cnpj.length !== 14) return;
-            fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
-                .then(function(r) {
-                    if (!r.ok) throw new Error('CNPJ nao encontrado');
-                    return r.json();
-                })
-                .then(function(d) {
-                    document.getElementById('modal_hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
-                    document.getElementById('modal_hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
-                    document.getElementById('modal_hospital_rua').value = d.logradouro || '';
-                    document.getElementById('modal_hospital_numero').value = d.numero || '';
-                    document.getElementById('modal_hospital_cep').value = d.cep || '';
-                    document.getElementById('modal_hospital_bairro').value = d.bairro || '';
-                    document.getElementById('modal_hospital_municipio').value = d.municipio || '';
-                    document.getElementById('modal_hospital_uf').value = d.uf || '';
-                    console.log('Busca CNPJ OK:', d.nome_fantasia, '| uf:', d.uf);
-                })
-                .catch(function(err) {
-                    console.error('Erro busca CNPJ:', err);
-                });
 
-            // Verifica duplicidade por CNPJ ANTES de preencher o resto do cadastro
+            function _limparModal() {
+                ['modal_hospital_nome','modal_hospital_telefone','modal_hospital_rua','modal_hospital_numero','modal_hospital_cep','modal_hospital_bairro','modal_hospital_municipio','modal_hospital_uf'].forEach(function(id) {
+                    document.getElementById(id).value = '';
+                });
+            }
+
+            function _buscarBrasilAPI() {
+                fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
+                    .then(function(r) { if (!r.ok) throw new Error('nao encontrado'); return r.json(); })
+                    .then(function(d) {
+                        document.getElementById('modal_hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
+                        document.getElementById('modal_hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
+                        document.getElementById('modal_hospital_rua').value = d.logradouro || '';
+                        document.getElementById('modal_hospital_numero').value = d.numero || '';
+                        document.getElementById('modal_hospital_cep').value = d.cep || '';
+                        document.getElementById('modal_hospital_bairro').value = d.bairro || '';
+                        document.getElementById('modal_hospital_municipio').value = d.municipio || '';
+                        document.getElementById('modal_hospital_uf').value = d.uf || '';
+                    })
+                    .catch(function() {});
+            }
+
             if (supabaseClient) {
-                supabaseClient.from('hospitais').select('*').eq('cnpj', cnpj).limit(1)
+                supabaseClient.from('hospitais').select('cnpj').eq('cnpj', cnpj).limit(1)
                     .then(function(r) {
-                        if (r.error) { console.error('Erro duplicidade:', r.error); return; }
-                        if (r.data && r.data.length > 0) {
-                            if (confirm('Já existe um hospital com este CNPJ. Deseja atualizar os dados dele?')) {
-                                document.getElementById('modal_hospital_nome').value = '';
-                                document.getElementById('modal_hospital_telefone').value = '';
-                                document.getElementById('modal_hospital_rua').value = '';
-                                document.getElementById('modal_hospital_numero').value = '';
-                                document.getElementById('modal_hospital_cep').value = '';
-                                document.getElementById('modal_hospital_bairro').value = '';
-                                document.getElementById('modal_hospital_municipio').value = '';
-                                document.getElementById('modal_hospital_uf').value = '';
-                            } else {
-                                document.getElementById('modal_hospital_cnpj').value = '';
-                                document.getElementById('modal_hospital_nome').value = '';
-                                document.getElementById('modal_hospital_telefone').value = '';
-                                document.getElementById('modal_hospital_rua').value = '';
-                                document.getElementById('modal_hospital_numero').value = '';
-                                document.getElementById('modal_hospital_cep').value = '';
-                                document.getElementById('modal_hospital_bairro').value = '';
-                                document.getElementById('modal_hospital_municipio').value = '';
-                                document.getElementById('modal_hospital_uf').value = '';
-                            }
+                        if (r.error || !r.data || r.data.length === 0) { _buscarBrasilAPI(); return; }
+                        if (!confirm('Já existe um hospital com este CNPJ. Deseja atualizar os dados dele?')) {
+                            _limparModal();
+                        } else {
+                            _limparModal();
                         }
                     });
+            } else {
+                _buscarBrasilAPI();
             }
         }, 500);
     });
