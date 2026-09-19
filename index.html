@@ -122,6 +122,13 @@
         input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
         input[readonly], textarea[readonly] { opacity: 0.5; cursor: default; }
         input:disabled { opacity: 0.5; cursor: not-allowed; color: var(--text-muted); background: #1e293b; border-color: #334155; pointer-events: none; }
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 100; background: #1e293b; border: 1px solid #334155; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; display: none; }
+        .autocomplete-list.show { display: block; }
+        .autocomplete-item { padding: 8px 12px; cursor: pointer; font-size: 12px; color: var(--text-primary); border-bottom: 1px solid #334155; }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.active { background: #0e7490; }
+        .autocomplete-item small { color: var(--text-muted); font-size: 11px; }
         select { cursor: pointer; -webkit-appearance: auto; appearance: auto; }
         textarea { resize: vertical; min-height: 50px; }
 
@@ -371,10 +378,11 @@
 
         <!-- Dados do Hospital -->
         <div class="row">
-            <div class="col-5 field-with-btn">
+            <div class="col-5 autocomplete-wrapper field-with-btn">
                 <label class="label label-cyan">Descrição Hospital</label>
-                <input type="text" id="hospital_nome">
+                <input type="text" id="hospital_nome" placeholder="Digite o nome do hospital..." autocomplete="off">
                 <button type="button" class="btn-add" onclick="abrirModal('modalHospital')" title="Cadastrar Hospital">+</button>
+                <div class="autocomplete-list" id="autocomplete_hospitais"></div>
             </div>
             <div class="col-2">
                 <label class="check-label red">
@@ -721,6 +729,72 @@
                 campoNome.value = 'CNPJ NAO ENCONTRADO (CADASTRE MANUALMENTE)';
                 console.error('Erro BrasilAPI:', err);
             });
+    });
+
+    // ========== AUTOCOMPLETE HOSPITAIS (Supabase) ==========
+    var _timerAutocomplete = null;
+    var _acIndex = -1;
+    var _acResults = [];
+    var _acInput = document.getElementById('hospital_nome');
+    var _acList = document.getElementById('autocomplete_hospitais');
+
+    function _acPreencherCampos(h) {
+        document.getElementById('hospital_nome').value = h.nome || '';
+        document.getElementById('hospital_cnpj').value = h.cnpj || '';
+        document.getElementById('hospital_telefone').value = h.telefone || '';
+        document.getElementById('hospital_rua').value = h.rua || '';
+        document.getElementById('hospital_numero').value = h.numero || '';
+        document.getElementById('hospital_cep').value = h.cep || '';
+        document.getElementById('hospital_bairro').value = h.bairro || '';
+        document.getElementById('hospital_municipio').value = h.municipio || '';
+        document.getElementById('hospital_uf').value = h.uf || '';
+    }
+
+    _acInput.addEventListener('input', function() {
+        clearTimeout(_timerAutocomplete);
+        _acIndex = -1;
+        var termo = _acInput.value.trim();
+        if (termo.length < 2) { _acList.classList.remove('show'); _acList.innerHTML = ''; return; }
+        if (!supabaseClient) return;
+        _timerAutocomplete = setTimeout(function() {
+            supabaseClient.from('hospitais').select('*').ilike('nome', '%' + termo + '%').limit(10)
+                .then(function(result) {
+                    if (result.error || !result.data || result.data.length === 0) {
+                        _acList.classList.remove('show');
+                        _acResults = [];
+                        return;
+                    }
+                    _acResults = result.data;
+                    _acList.innerHTML = '';
+                    result.data.forEach(function(h, i) {
+                        var div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = '<strong>' + (h.nome || '') + '</strong> <small>CNPJ: ' + (h.cnpj || '') + '</small>';
+                        div.addEventListener('click', function() {
+                            _acPreencherCampos(h);
+                            _acList.classList.remove('show');
+                        });
+                        _acList.appendChild(div);
+                    });
+                    _acList.classList.add('show');
+                });
+        }, 400);
+    });
+
+    _acInput.addEventListener('keydown', function(e) {
+        var items = _acList.querySelectorAll('.autocomplete-item');
+        if (!_acList.classList.contains('show') || items.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); _acIndex = Math.min(_acIndex + 1, items.length - 1); _acAtualizar(items); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); _acIndex = Math.max(_acIndex - 1, 0); _acAtualizar(items); }
+        else if (e.key === 'Enter' && _acIndex >= 0) { e.preventDefault(); _acPreencherCampos(_acResults[_acIndex]); _acList.classList.remove('show'); }
+        else if (e.key === 'Escape') { _acList.classList.remove('show'); }
+    });
+    function _acAtualizar(items) {
+        items.forEach(function(it, i) { it.classList.toggle('active', i === _acIndex); });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!_acInput.contains(e.target) && !_acList.contains(e.target)) { _acList.classList.remove('show'); }
     });
 
     // ========== OBSERVAÇÕES ==========
