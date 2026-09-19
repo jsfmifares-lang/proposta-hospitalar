@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Informações Gerais - CotMed Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -624,46 +624,70 @@
 </div>
 
 <script>
-    // ========== CONEXÃO SUPABASE ==========
-    const SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ========== MODAIS ==========
+    // ========== MODAIS (funcionam sem Supabase) ==========
     function abrirModal(id) {
         document.getElementById(id).classList.add('active');
     }
     function fecharModal(id) {
         document.getElementById(id).classList.remove('active');
     }
-    // Fechar modal clicando fora
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
             if (e.target === overlay) overlay.classList.remove('active');
         });
     });
 
+    // ========== CONEXÃO SUPABASE ==========
+    var SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
+    var supabaseClient = null;
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } else {
+            console.error('Supabase SDK não carregou. Verifique o CDN.');
+        }
+    } catch (err) {
+        console.error('Erro ao criar cliente Supabase:', err);
+    }
+
+    // ========== OBSERVAÇÕES ==========
+    var checkboxObs = document.getElementById('com_observacoes');
+    var wrapperObs = document.getElementById('wrapper_observacoes');
+    function atualizarVisibilidadeObs() {
+        wrapperObs.style.display = checkboxObs.checked ? 'block' : 'none';
+    }
+    checkboxObs.addEventListener('change', atualizarVisibilidadeObs);
+    atualizarVisibilidadeObs();
+
+    // ========== SEM HOSPITAL ==========
+    var checkboxSemHospital = document.getElementById('sem_hospital');
+    var camposHospital = ['hospital_nome','hospital_cnpj','hospital_telefone','hospital_rua','hospital_numero','hospital_cep','hospital_bairro','hospital_municipio','hospital_uf'];
+    checkboxSemHospital.addEventListener('change', function() {
+        camposHospital.forEach(function(id) {
+            var el = document.getElementById(id);
+            el.readOnly = checkboxSemHospital.checked;
+            el.style.opacity = checkboxSemHospital.checked ? '0.4' : '1';
+        });
+        if (checkboxSemHospital.checked) {
+            camposHospital.forEach(function(id) { document.getElementById(id).value = ''; });
+        }
+    });
+
+    // ========== NÚMERO PROPOSTA ==========
+    function gerarNumeroProposta() {
+        var agora = new Date();
+        var data = agora.toISOString().slice(0, 10).replace(/-/g, '');
+        var aleatorio = Math.floor(1000 + Math.random() * 9000);
+        return 'PH-' + data + '-' + aleatorio;
+    }
+    document.getElementById('numero_proposta').value = gerarNumeroProposta();
+
     // ========== SALVAR HOSPITAL ==========
-    async function salvarHospital() {
-        const nome = document.getElementById('modal_hospital_nome').value.trim();
-        const cnpj = document.getElementById('modal_hospital_cnpj').value.trim();
+    function salvarHospital() {
+        var nome = document.getElementById('modal_hospital_nome').value.trim();
+        var cnpj = document.getElementById('modal_hospital_cnpj').value.trim();
         if (!nome || !cnpj) { alert('Preencha nome e CNPJ.'); return; }
-
-        const { data, error } = await supabase.from('hospitais').upsert({
-            cnpj: cnpj.replace(/\D/g, ''),
-            nome: nome,
-            telefone: document.getElementById('modal_hospital_telefone').value.trim(),
-            rua: document.getElementById('modal_hospital_rua').value.trim(),
-            numero: document.getElementById('modal_hospital_numero').value.trim(),
-            cep: document.getElementById('modal_hospital_cep').value.trim(),
-            bairro: document.getElementById('modal_hospital_bairro').value.trim(),
-            municipio: document.getElementById('modal_hospital_municipio').value.trim(),
-            uf: document.getElementById('modal_hospital_uf').value.trim().toUpperCase()
-        }).select();
-
-        if (error) { alert('Erro: ' + error.message); return; }
-
-        // Preenche os campos do formulário
         document.getElementById('hospital_nome').value = nome;
         document.getElementById('hospital_cnpj').value = cnpj;
         document.getElementById('hospital_telefone').value = document.getElementById('modal_hospital_telefone').value;
@@ -673,121 +697,64 @@
         document.getElementById('hospital_bairro').value = document.getElementById('modal_hospital_bairro').value;
         document.getElementById('hospital_municipio').value = document.getElementById('modal_hospital_municipio').value;
         document.getElementById('hospital_uf').value = document.getElementById('modal_hospital_uf').value.toUpperCase();
-
-        // Limpa modal
-        document.getElementById('modalHospital').querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('modalHospital').querySelectorAll('input').forEach(function(i) { i.value = ''; });
         fecharModal('modalHospital');
         alert('Hospital cadastrado com sucesso!');
+        if (supabaseClient) {
+            supabaseClient.from('hospitais').upsert({
+                cnpj: cnpj.replace(/\D/g, ''),
+                nome: nome,
+                telefone: document.getElementById('hospital_telefone').value,
+                rua: document.getElementById('hospital_rua').value,
+                numero: document.getElementById('hospital_numero').value,
+                cep: document.getElementById('hospital_cep').value,
+                bairro: document.getElementById('hospital_bairro').value,
+                municipio: document.getElementById('hospital_municipio').value,
+                uf: document.getElementById('hospital_uf').value
+            }).then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+        }
     }
 
     // ========== SALVAR MÉDICO ==========
-    async function salvarMedico() {
-        const nome = document.getElementById('modal_medico_nome').value.trim();
+    function salvarMedico() {
+        var nome = document.getElementById('modal_medico_nome').value.trim();
         if (!nome) { alert('Preencha o nome do médico.'); return; }
-
-        const { data, error } = await supabase.from('medicos').upsert({
-            nome: nome,
-            crm: document.getElementById('modal_medico_crm').value.trim(),
-            especialidade: document.getElementById('modal_medico_especialidade').value.trim()
-        }).select();
-
-        if (error) { alert('Erro: ' + error.message); return; }
-
         document.getElementById('medico_nome').value = nome;
-        document.getElementById('modalMedico').querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('modalMedico').querySelectorAll('input').forEach(function(i) { i.value = ''; });
         fecharModal('modalMedico');
         alert('Médico cadastrado com sucesso!');
+        if (supabaseClient) {
+            supabaseClient.from('medicos').upsert({
+                nome: nome,
+                crm: document.getElementById('modal_medico_crm').value.trim(),
+                especialidade: document.getElementById('modal_medico_especialidade').value.trim()
+            }).then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+        }
     }
 
     // ========== SALVAR CONVÊNIO ==========
-    async function salvarConvenio() {
-        const nome = document.getElementById('modal_convenio_nome').value.trim();
+    function salvarConvenio() {
+        var nome = document.getElementById('modal_convenio_nome').value.trim();
         if (!nome) { alert('Preencha o nome do convênio.'); return; }
-
-        const { data, error } = await supabase.from('convenios').upsert({
-            nome: nome,
-            cnpj: document.getElementById('modal_convenio_cnpj').value.trim().replace(/\D/g, ''),
-            telefone: document.getElementById('modal_convenio_telefone').value.trim()
-        }).select();
-
-        if (error) { alert('Erro: ' + error.message); return; }
-
         document.getElementById('convenio_nome').value = nome;
-        document.getElementById('modalConvenio').querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('modalConvenio').querySelectorAll('input').forEach(function(i) { i.value = ''; });
         fecharModal('modalConvenio');
         alert('Convênio cadastrado com sucesso!');
-    }
-
-    // ========== OBSERVAÇÕES ==========
-    const checkboxObs = document.getElementById('com_observacoes');
-    const wrapperObs = document.getElementById('wrapper_observacoes');
-    function atualizarVisibilidadeObs() {
-        wrapperObs.style.display = checkboxObs.checked ? 'block' : 'none';
-    }
-    checkboxObs.addEventListener('change', atualizarVisibilidadeObs);
-    atualizarVisibilidadeObs();
-
-    // ========== SEM HOSPITAL ==========
-    const checkboxSemHospital = document.getElementById('sem_hospital');
-    const camposHospital = ['hospital_nome','hospital_cnpj','hospital_telefone','hospital_rua','hospital_numero','hospital_cep','hospital_bairro','hospital_municipio','hospital_uf'];
-    checkboxSemHospital.addEventListener('change', () => {
-        camposHospital.forEach(id => {
-            const el = document.getElementById(id);
-            el.readOnly = checkboxSemHospital.checked;
-            el.style.opacity = checkboxSemHospital.checked ? '0.4' : '1';
-        });
-        if (checkboxSemHospital.checked) {
-            camposHospital.forEach(id => document.getElementById(id).value = '');
+        if (supabaseClient) {
+            supabaseClient.from('convenios').upsert({
+                nome: nome,
+                cnpj: document.getElementById('modal_convenio_cnpj').value.trim().replace(/\D/g, ''),
+                telefone: document.getElementById('modal_convenio_telefone').value.trim()
+            }).then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
         }
-    });
-
-    // ========== NÚMERO PROPOSTA ==========
-    function gerarNumeroProposta() {
-        const agora = new Date();
-        const data = agora.toISOString().slice(0, 10).replace(/-/g, '');
-        const aleatorio = Math.floor(1000 + Math.random() * 9000);
-        return 'PH-' + data + '-' + aleatorio;
     }
-    document.getElementById('numero_proposta').value = gerarNumeroProposta();
-
-    // ========== BUSCA CNPJ PELO SUPABASE ==========
-    document.getElementById('busca_cnpj').addEventListener('change', async (e) => {
-        const cnpj = e.target.value.replace(/\D/g, '');
-        const campoNome = document.getElementById('busca_nome_hospital');
-
-        if (!cnpj) { campoNome.value = ''; return; }
-
-        campoNome.value = 'Buscando...';
-
-        const { data, error } = await supabase
-            .from('hospitais')
-            .select('*')
-            .eq('cnpj', cnpj)
-            .single();
-
-        if (error || !data) {
-            campoNome.value = 'CNPJ NÃO LOCALIZADO (CADASTRE MANUALMENTE)';
-            return;
-        }
-
-        campoNome.value = data.nome;
-        document.getElementById('hospital_nome').value = data.nome || '';
-        document.getElementById('hospital_cnpj').value = e.target.value;
-        document.getElementById('hospital_telefone').value = data.telefone || '';
-        document.getElementById('hospital_rua').value = data.rua || '';
-        document.getElementById('hospital_numero').value = data.numero || '';
-        document.getElementById('hospital_cep').value = data.cep || '';
-        document.getElementById('hospital_bairro').value = data.bairro || '';
-        document.getElementById('hospital_municipio').value = data.municipio || '';
-        document.getElementById('hospital_uf').value = data.uf || '';
-    });
 
     // ========== LIMPAR ==========
-    document.getElementById('btnLimpar').addEventListener('click', () => {
+    document.getElementById('btnLimpar').addEventListener('click', function() {
         document.getElementById('formGerais').reset();
         checkboxSemHospital.checked = false;
-        camposHospital.forEach(id => {
-            const el = document.getElementById(id);
+        camposHospital.forEach(function(id) {
+            var el = document.getElementById(id);
             el.readOnly = false;
             el.style.opacity = '1';
         });
@@ -795,11 +762,10 @@
         atualizarVisibilidadeObs();
     });
 
-    // ========== SALVAR NO SUPABASE ==========
-    document.getElementById('formGerais').addEventListener('submit', async (e) => {
+    // ========== SUBMETER FORMULÁRIO ==========
+    document.getElementById('formGerais').addEventListener('submit', function(e) {
         e.preventDefault();
-
-        const capa = {
+        var capa = {
             numero_proposta: document.getElementById('numero_proposta').value,
             sem_hospital: checkboxSemHospital.checked,
             hospital_nome: document.getElementById('hospital_nome').value,
@@ -823,20 +789,15 @@
             validade_proposta: document.getElementById('validade_proposta').value,
             criado_em: new Date().toISOString()
         };
-
-        // Salva no Supabase
-        const { data, error } = await supabase
-            .from('propostas')
-            .upsert({ numero_proposta: capa.numero_proposta, capa: capa })
-            .select();
-
-        if (error) {
-            alert('Erro ao salvar no banco: ' + error.message);
-            return;
-        }
-
-        // Salva no localStorage também (para a tela de itens)
         localStorage.setItem('proposta_atual_capa', JSON.stringify(capa));
+        if (supabaseClient) {
+            supabaseClient.from('propostas').upsert({
+                numero_proposta: capa.numero_proposta,
+                capa: capa
+            }).then(function(r) {
+                if (r.error) console.error('Erro Supabase:', r.error);
+            });
+        }
         window.location.href = 'itens.html';
     });
 </script>
