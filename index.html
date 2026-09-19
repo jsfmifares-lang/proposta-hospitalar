@@ -513,46 +513,46 @@
             <button class="modal-close" onclick="fecharModal('modalHospital')">&times;</button>
         </div>
         <div class="modal-body">
-            <div>
-                <label class="label label-cyan">Nome do Hospital</label>
-                <input type="text" id="modal_hospital_nome" placeholder="Ex: CENTRO HOSPITALAR...">
-            </div>
             <div class="row">
-                <div class="col-6">
-                    <label class="label label-slate">CNPJ</label>
+                <div class="col-4">
+                    <label class="label label-cyan">CNPJ</label>
                     <input type="text" id="modal_hospital_cnpj" placeholder="00.000.000/0000-00">
                 </div>
-                <div class="col-6">
-                    <label class="label label-slate">Telefone</label>
-                    <input type="text" id="modal_hospital_telefone" placeholder="(00) 0000-0000">
+                <div class="col-8">
+                    <label class="label label-cyan">Nome do Hospital</label>
+                    <input type="text" id="modal_hospital_nome" placeholder="Preenchido automaticamente..." disabled>
                 </div>
             </div>
             <div class="row">
+                <div class="col-4">
+                    <label class="label label-slate">Telefone</label>
+                    <input type="text" id="modal_hospital_telefone" disabled>
+                </div>
                 <div class="col-8">
                     <label class="label label-slate">Rua / Logradouro</label>
-                    <input type="text" id="modal_hospital_rua">
-                </div>
-                <div class="col-4">
-                    <label class="label label-slate">Nº</label>
-                    <input type="text" id="modal_hospital_numero">
+                    <input type="text" id="modal_hospital_rua" disabled>
                 </div>
             </div>
             <div class="row">
                 <div class="col-2">
+                    <label class="label label-slate">Nº</label>
+                    <input type="text" id="modal_hospital_numero" disabled>
+                </div>
+                <div class="col-2">
                     <label class="label label-slate">CEP</label>
-                    <input type="text" id="modal_hospital_cep">
+                    <input type="text" id="modal_hospital_cep" disabled>
                 </div>
                 <div class="col-4">
                     <label class="label label-slate">Bairro</label>
-                    <input type="text" id="modal_hospital_bairro">
+                    <input type="text" id="modal_hospital_bairro" disabled>
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                     <label class="label label-slate">Município</label>
-                    <input type="text" id="modal_hospital_municipio">
+                    <input type="text" id="modal_hospital_municipio" disabled>
                 </div>
-                <div class="col-2">
+                <div class="col-1">
                     <label class="label label-slate">UF</label>
-                    <input type="text" id="modal_hospital_uf" maxlength="2" style="text-transform:uppercase;">
+                    <input type="text" id="modal_hospital_uf" maxlength="2" style="text-transform:uppercase;" disabled>
                 </div>
             </div>
         </div>
@@ -626,6 +626,19 @@
 <script>
     // ========== MODAIS (funcionam sem Supabase) ==========
     function abrirModal(id) {
+        if (id === 'modalHospital') {
+            document.getElementById('modal_hospital_cnpj').value = '';
+            document.getElementById('modal_hospital_nome').value = '';
+            document.getElementById('modal_hospital_telefone').value = '';
+            document.getElementById('modal_hospital_rua').value = '';
+            document.getElementById('modal_hospital_numero').value = '';
+            document.getElementById('modal_hospital_cep').value = '';
+            document.getElementById('modal_hospital_bairro').value = '';
+            document.getElementById('modal_hospital_municipio').value = '';
+            document.getElementById('modal_hospital_uf').value = '';
+            var camposModal = ['modal_hospital_nome','modal_hospital_telefone','modal_hospital_rua','modal_hospital_numero','modal_hospital_cep','modal_hospital_bairro','modal_hospital_municipio','modal_hospital_uf'];
+            camposModal.forEach(function(c) { document.getElementById(c).disabled = true; });
+        }
         document.getElementById(id).classList.add('active');
     }
     function fecharModal(id) {
@@ -672,6 +685,8 @@
                     document.getElementById('modal_hospital_bairro').value = d.bairro || '';
                     document.getElementById('modal_hospital_municipio').value = d.municipio || '';
                     document.getElementById('modal_hospital_uf').value = d.uf || '';
+                    var camposModal = ['modal_hospital_nome','modal_hospital_telefone','modal_hospital_rua','modal_hospital_numero','modal_hospital_cep','modal_hospital_bairro','modal_hospital_municipio','modal_hospital_uf'];
+                    camposModal.forEach(function(c) { document.getElementById(c).disabled = false; });
                     console.log('Busca CNPJ OK:', d.nome_fantasia, '| uf:', d.uf);
                 })
                 .catch(function(err) {
