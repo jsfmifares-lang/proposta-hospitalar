@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Materiais - CotMed Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -392,9 +392,16 @@
 
 <script>
     // ========== CONEXÃO SUPABASE ==========
-    const SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
+    var supabaseClient = null;
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+    } catch (err) {
+        console.error('Erro ao conectar Supabase:', err);
+    }
 
     // ========== DADOS DA CAPA ==========
     const dadosCapa = JSON.parse(localStorage.getItem('proposta_atual_capa') || '{}');
@@ -519,19 +526,21 @@
         };
 
         // Salva no Supabase (atualiza a proposta com os itens)
-        const { data, error } = await supabase
-            .from('propostas')
-            .upsert({
-                numero_proposta: dadosCapa.numero_proposta,
-                capa: dadosCapa,
-                itens: itensDaProposta,
-                total: total
-            })
-            .select();
+        if (supabaseClient) {
+            var result = await supabaseClient
+                .from('propostas')
+                .upsert({
+                    numero_proposta: dadosCapa.numero_proposta,
+                    capa: dadosCapa,
+                    itens: itensDaProposta,
+                    total: total
+                })
+                .select();
 
-        if (error) {
-            alert('Erro ao salvar no banco: ' + error.message);
-            return;
+            if (result.error) {
+                alert('Erro ao salvar no banco: ' + result.error.message);
+                return;
+            }
         }
 
         // Salva no localStorage também
