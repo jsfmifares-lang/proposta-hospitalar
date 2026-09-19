@@ -853,6 +853,24 @@
         var nome = document.getElementById('modal_hospital_nome').value.trim();
         var cnpj = document.getElementById('modal_hospital_cnpj').value.trim();
         if (!nome || !cnpj) { alert('Preencha nome e CNPJ.'); return; }
+        var cnpjSoDigitos = cnpj.replace(/\D/g, '');
+
+        // Verifica duplicidade por CNPJ
+        function _prosseguirCadastro() {
+            supabaseClient.from('hospitais').upsert({
+                cnpj: cnpjSoDigitos,
+                nome: nome,
+                telefone: document.getElementById('modal_hospital_telefone').value.trim(),
+                rua: document.getElementById('modal_hospital_rua').value.trim(),
+                numero: document.getElementById('modal_hospital_numero').value.trim(),
+                cep: document.getElementById('modal_hospital_cep').value.trim(),
+                bairro: document.getElementById('modal_hospital_bairro').value.trim(),
+                municipio: document.getElementById('modal_hospital_municipio').value.trim(),
+                uf: document.getElementById('modal_hospital_uf').value.trim()
+            }, { onConflict: 'cnpj' })
+                .then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+        }
+
         document.getElementById('hospital_nome').value = nome;
         document.getElementById('hospital_cnpj').value = cnpj;
         document.getElementById('hospital_telefone').value = document.getElementById('modal_hospital_telefone').value;
@@ -865,18 +883,31 @@
         document.getElementById('modalHospital').querySelectorAll('input').forEach(function(i) { i.value = ''; });
         fecharModal('modalHospital');
         alert('Hospital cadastrado com sucesso!');
+    }
+
+    // ========== SALVAR MÉDICO ==========
+                    nome: nome,
+                    telefone: document.getElementById('hospital_telefone').value,
+                    rua: document.getElementById('hospital_rua').value,
+                    numero: document.getElementById('hospital_numero').value,
+                    cep: document.getElementById('hospital_cep').value,
+                    bairro: document.getElementById('hospital_bairro').value,
+                    municipio: document.getElementById('hospital_municipio').value,
+                    uf: document.getElementById('hospital_uf').value
+                }).then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+            }
+        }
         if (supabaseClient) {
-            supabaseClient.from('hospitais').upsert({
-                cnpj: cnpj.replace(/\D/g, ''),
-                nome: nome,
-                telefone: document.getElementById('hospital_telefone').value,
-                rua: document.getElementById('hospital_rua').value,
-                numero: document.getElementById('hospital_numero').value,
-                cep: document.getElementById('hospital_cep').value,
-                bairro: document.getElementById('hospital_bairro').value,
-                municipio: document.getElementById('hospital_municipio').value,
-                uf: document.getElementById('hospital_uf').value
-            }).then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+            supabaseClient.from('hospitais').select('cnpj').eq('cnpj', cnpjSoDigitos).limit(1)
+                .then(function(r) {
+                    if (r.error) { console.error('Erro duplicidade:', r.error); _prosseguirCadastro(); return; }
+                    if (r.data && r.data.length > 0) {
+                        if (!confirm('Já existe um hospital com este CNPJ. Deseja atualizar os dados dele?')) { return; }
+                    }
+                    _prosseguirCadastro();
+                });
+        } else {
+            _prosseguirCadastro();
         }
     }
 
