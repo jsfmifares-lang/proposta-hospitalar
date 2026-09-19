@@ -692,6 +692,13 @@
                 });
             }
 
+            function _habilitarCampos() {
+                ['modal_hospital_nome','modal_hospital_telefone','modal_hospital_rua','modal_hospital_numero','modal_hospital_cep','modal_hospital_bairro','modal_hospital_municipio','modal_hospital_uf'].forEach(function(id) {
+                    document.getElementById(id).disabled = false;
+                    document.getElementById(id).style.opacity = '1';
+                });
+            }
+
             function _buscarBrasilAPI() {
                 fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
                     .then(function(r) { if (!r.ok) throw new Error('nao encontrado'); return r.json(); })
@@ -704,8 +711,11 @@
                         document.getElementById('modal_hospital_bairro').value = d.bairro || '';
                         document.getElementById('modal_hospital_municipio').value = d.municipio || '';
                         document.getElementById('modal_hospital_uf').value = d.uf || '';
+                        _habilitarCampos();
                     })
-                    .catch(function() {});
+                    .catch(function() {
+                        _habilitarCampos();
+                    });
             }
 
             if (supabaseClient) {
@@ -724,6 +734,7 @@
                             document.getElementById('modal_hospital_bairro').value = h.bairro || '';
                             document.getElementById('modal_hospital_municipio').value = h.municipio || '';
                             document.getElementById('modal_hospital_uf').value = h.uf || '';
+                            _habilitarCampos();
                         }
                     });
             } else {
