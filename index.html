@@ -121,6 +121,7 @@
         input::placeholder, textarea::placeholder { color: #475569; }
         input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
         input[readonly], textarea[readonly] { opacity: 0.5; cursor: default; }
+        input:disabled { opacity: 0.4; cursor: not-allowed; color: var(--text-muted); }
         select { cursor: pointer; -webkit-appearance: auto; appearance: auto; }
         textarea { resize: vertical; min-height: 50px; }
 
@@ -542,7 +543,7 @@
                     <label class="label label-slate">CEP</label>
                     <input type="text" id="modal_hospital_cep" disabled>
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                     <label class="label label-slate">Bairro</label>
                     <input type="text" id="modal_hospital_bairro" disabled>
                 </div>
@@ -550,7 +551,7 @@
                     <label class="label label-slate">Município</label>
                     <input type="text" id="modal_hospital_municipio" disabled>
                 </div>
-                <div class="col-1">
+                <div class="col-2">
                     <label class="label label-slate">UF</label>
                     <input type="text" id="modal_hospital_uf" maxlength="2" style="text-transform:uppercase;" disabled>
                 </div>
