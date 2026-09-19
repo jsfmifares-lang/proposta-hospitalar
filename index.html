@@ -231,6 +231,106 @@
         }
         .btn-danger:hover { background: rgba(248,113,113,0.1); }
 
+        /* Field with + button */
+        .field-with-btn { position: relative; }
+        .field-with-btn input { width: 100%; }
+        .btn-add {
+            position: absolute;
+            right: 8px;
+            top: 26px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            z-index: 2;
+            line-height: 1;
+        }
+        .btn-add:hover { background: #06b6d4; transform: scale(1.1); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .modal-header {
+            background: var(--bg-header);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal-header h2 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+            text-transform: uppercase;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--accent-red); }
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-input);
+        }
+        .btn-cancel:hover { border-color: var(--accent-red); color: var(--accent-red); }
+        .btn-save {
+            background: var(--bg-cyan);
+            color: #fff;
+            border: 1px solid var(--accent-cyan);
+        }
+        .btn-save:hover { background: var(--accent-cyan); }
+
         /* Responsive */
         @media (max-width: 768px) {
             .row > [class*="col-"] { width: 100% !important; }
@@ -270,9 +370,10 @@
 
         <!-- Dados do Hospital -->
         <div class="row">
-            <div class="col-5">
+            <div class="col-5 field-with-btn">
                 <label class="label label-cyan">Descrição Hospital</label>
                 <input type="text" id="hospital_nome">
+                <button type="button" class="btn-add" onclick="abrirModal('modalHospital')" title="Cadastrar Hospital">+</button>
             </div>
             <div class="col-2">
                 <label class="check-label red">
@@ -321,9 +422,10 @@
 
         <!-- Médico / Paciente -->
         <div class="row">
-            <div class="col-4">
+            <div class="col-4 field-with-btn">
                 <label class="label label-cyan">Médico Solicitante &#x1f4dd;</label>
                 <input type="text" id="medico_nome" placeholder="Nome do profissional de saúde...">
+                <button type="button" class="btn-add" onclick="abrirModal('modalMedico')" title="Cadastrar Médico">+</button>
             </div>
             <div class="col-5">
                 <label class="label label-cyan">Nome Completo do Paciente</label>
@@ -338,9 +440,10 @@
 
         <!-- Dados Comerciais -->
         <div class="row">
-            <div class="col-4">
+            <div class="col-4 field-with-btn">
                 <label class="label label-slate">Convênio Responsável</label>
                 <input type="text" id="convenio_nome" placeholder="Ex: UNIMED, BRADESCO...">
+                <button type="button" class="btn-add" onclick="abrirModal('modalConvenio')" title="Cadastrar Convênio">+</button>
             </div>
             <div class="col-3">
                 <label class="label label-slate">Aos Cuidados De (A/C)</label>
@@ -402,11 +505,218 @@
     </form>
 </div>
 
+<!-- ==================== MODAL HOSPITAL ==================== -->
+<div class="modal-overlay" id="modalHospital">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Cadastrar Hospital</h2>
+            <button class="modal-close" onclick="fecharModal('modalHospital')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label class="label label-cyan">Nome do Hospital</label>
+                <input type="text" id="modal_hospital_nome" placeholder="Ex: CENTRO HOSPITALAR...">
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label class="label label-slate">CNPJ</label>
+                    <input type="text" id="modal_hospital_cnpj" placeholder="00.000.000/0000-00">
+                </div>
+                <div class="col-6">
+                    <label class="label label-slate">Telefone</label>
+                    <input type="text" id="modal_hospital_telefone" placeholder="(00) 0000-0000">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8">
+                    <label class="label label-slate">Rua / Logradouro</label>
+                    <input type="text" id="modal_hospital_rua">
+                </div>
+                <div class="col-4">
+                    <label class="label label-slate">Nº</label>
+                    <input type="text" id="modal_hospital_numero">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <label class="label label-slate">CEP</label>
+                    <input type="text" id="modal_hospital_cep">
+                </div>
+                <div class="col-4">
+                    <label class="label label-slate">Bairro</label>
+                    <input type="text" id="modal_hospital_bairro">
+                </div>
+                <div class="col-4">
+                    <label class="label label-slate">Município</label>
+                    <input type="text" id="modal_hospital_municipio">
+                </div>
+                <div class="col-1">
+                    <label class="label label-slate">UF</label>
+                    <input type="text" id="modal_hospital_uf" maxlength="2" style="text-transform:uppercase;">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="fecharModal('modalHospital')">Cancelar</button>
+            <button class="btn btn-save" onclick="salvarHospital()">Cadastrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL MÉDICO ==================== -->
+<div class="modal-overlay" id="modalMedico">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Cadastrar Médico</h2>
+            <button class="modal-close" onclick="fecharModal('modalMedico')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label class="label label-cyan">Nome Completo</label>
+                <input type="text" id="modal_medico_nome" placeholder="Ex: DR(A). JOÃO DA SILVA">
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label class="label label-slate">CRM</label>
+                    <input type="text" id="modal_medico_crm" placeholder="Ex: 12345/BA">
+                </div>
+                <div class="col-6">
+                    <label class="label label-slate">Especialidade</label>
+                    <input type="text" id="modal_medico_especialidade" placeholder="Ex: ORTOPEDISTA">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="fecharModal('modalMedico')">Cancelar</button>
+            <button class="btn btn-save" onclick="salvarMedico()">Cadastrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL CONVÊNIO ==================== -->
+<div class="modal-overlay" id="modalConvenio">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Cadastrar Convênio</h2>
+            <button class="modal-close" onclick="fecharModal('modalConvenio')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label class="label label-cyan">Nome do Convênio</label>
+                <input type="text" id="modal_convenio_nome" placeholder="Ex: UNIMED, BRADESCO SAÚDE...">
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label class="label label-slate">CNPJ</label>
+                    <input type="text" id="modal_convenio_cnpj" placeholder="00.000.000/0000-00">
+                </div>
+                <div class="col-6">
+                    <label class="label label-slate">Telefone</label>
+                    <input type="text" id="modal_convenio_telefone" placeholder="(00) 0000-0000">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="fecharModal('modalConvenio')">Cancelar</button>
+            <button class="btn btn-save" onclick="salvarConvenio()">Cadastrar</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ========== CONEXÃO SUPABASE ==========
     const SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ========== MODAIS ==========
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function fecharModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    // Fechar modal clicando fora
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        });
+    });
+
+    // ========== SALVAR HOSPITAL ==========
+    async function salvarHospital() {
+        const nome = document.getElementById('modal_hospital_nome').value.trim();
+        const cnpj = document.getElementById('modal_hospital_cnpj').value.trim();
+        if (!nome || !cnpj) { alert('Preencha nome e CNPJ.'); return; }
+
+        const { data, error } = await supabase.from('hospitais').upsert({
+            cnpj: cnpj.replace(/\D/g, ''),
+            nome: nome,
+            telefone: document.getElementById('modal_hospital_telefone').value.trim(),
+            rua: document.getElementById('modal_hospital_rua').value.trim(),
+            numero: document.getElementById('modal_hospital_numero').value.trim(),
+            cep: document.getElementById('modal_hospital_cep').value.trim(),
+            bairro: document.getElementById('modal_hospital_bairro').value.trim(),
+            municipio: document.getElementById('modal_hospital_municipio').value.trim(),
+            uf: document.getElementById('modal_hospital_uf').value.trim().toUpperCase()
+        }).select();
+
+        if (error) { alert('Erro: ' + error.message); return; }
+
+        // Preenche os campos do formulário
+        document.getElementById('hospital_nome').value = nome;
+        document.getElementById('hospital_cnpj').value = cnpj;
+        document.getElementById('hospital_telefone').value = document.getElementById('modal_hospital_telefone').value;
+        document.getElementById('hospital_rua').value = document.getElementById('modal_hospital_rua').value;
+        document.getElementById('hospital_numero').value = document.getElementById('modal_hospital_numero').value;
+        document.getElementById('hospital_cep').value = document.getElementById('modal_hospital_cep').value;
+        document.getElementById('hospital_bairro').value = document.getElementById('modal_hospital_bairro').value;
+        document.getElementById('hospital_municipio').value = document.getElementById('modal_hospital_municipio').value;
+        document.getElementById('hospital_uf').value = document.getElementById('modal_hospital_uf').value.toUpperCase();
+
+        // Limpa modal
+        document.getElementById('modalHospital').querySelectorAll('input').forEach(i => i.value = '');
+        fecharModal('modalHospital');
+        alert('Hospital cadastrado com sucesso!');
+    }
+
+    // ========== SALVAR MÉDICO ==========
+    async function salvarMedico() {
+        const nome = document.getElementById('modal_medico_nome').value.trim();
+        if (!nome) { alert('Preencha o nome do médico.'); return; }
+
+        const { data, error } = await supabase.from('medicos').upsert({
+            nome: nome,
+            crm: document.getElementById('modal_medico_crm').value.trim(),
+            especialidade: document.getElementById('modal_medico_especialidade').value.trim()
+        }).select();
+
+        if (error) { alert('Erro: ' + error.message); return; }
+
+        document.getElementById('medico_nome').value = nome;
+        document.getElementById('modalMedico').querySelectorAll('input').forEach(i => i.value = '');
+        fecharModal('modalMedico');
+        alert('Médico cadastrado com sucesso!');
+    }
+
+    // ========== SALVAR CONVÊNIO ==========
+    async function salvarConvenio() {
+        const nome = document.getElementById('modal_convenio_nome').value.trim();
+        if (!nome) { alert('Preencha o nome do convênio.'); return; }
+
+        const { data, error } = await supabase.from('convenios').upsert({
+            nome: nome,
+            cnpj: document.getElementById('modal_convenio_cnpj').value.trim().replace(/\D/g, ''),
+            telefone: document.getElementById('modal_convenio_telefone').value.trim()
+        }).select();
+
+        if (error) { alert('Erro: ' + error.message); return; }
+
+        document.getElementById('convenio_nome').value = nome;
+        document.getElementById('modalConvenio').querySelectorAll('input').forEach(i => i.value = '');
+        fecharModal('modalConvenio');
+        alert('Convênio cadastrado com sucesso!');
+    }
 
     // ========== OBSERVAÇÕES ==========
     const checkboxObs = document.getElementById('com_observacoes');
