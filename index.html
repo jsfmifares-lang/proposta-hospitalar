@@ -891,7 +891,10 @@
                 municipio: document.getElementById('modal_hospital_municipio').value.trim(),
                 uf: document.getElementById('modal_hospital_uf').value.trim()
             }, { onConflict: 'cnpj' })
-                .then(function(r) { if (r.error) console.error('Erro Supabase:', r.error); });
+                .then(function(r) {
+                    if (r.error) { alert('Erro Supabase: ' + r.error.message); console.error('Erro Supabase:', r.error); }
+                    else { alert('Salvo OK!\nTelefone: ' + document.getElementById('modal_hospital_telefone').value + '\nRua: ' + document.getElementById('modal_hospital_rua').value + '\nCEP: ' + document.getElementById('modal_hospital_cep').value); }
+                });
         }
 
         if (supabaseClient) {
