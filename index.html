@@ -538,7 +538,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-3">
+                <div class="col-2">
                     <label class="label label-slate">CEP</label>
                     <input type="text" id="modal_hospital_cep">
                 </div>
@@ -550,7 +550,7 @@
                     <label class="label label-slate">Município</label>
                     <input type="text" id="modal_hospital_municipio">
                 </div>
-                <div class="col-1">
+                <div class="col-2">
                     <label class="label label-slate">UF</label>
                     <input type="text" id="modal_hospital_uf" maxlength="2" style="text-transform:uppercase;">
                 </div>
@@ -652,28 +652,32 @@
     }
 
     // ========== BUSCA CNPJ POR API (BrasilAPI) ==========
-    document.getElementById('modal_hospital_cnpj').addEventListener('blur', function(e) {
-        var cnpj = e.target.value.replace(/\D/g, '');
-        if (!cnpj || cnpj.length !== 14) return;
-        fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
-            .then(function(r) {
-                if (!r.ok) throw new Error('CNPJ nao encontrado');
-                return r.json();
-            })
-            .then(function(d) {
-                document.getElementById('modal_hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
-                document.getElementById('modal_hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
-                document.getElementById('modal_hospital_rua').value = d.logradouro || '';
-                document.getElementById('modal_hospital_numero').value = d.numero || '';
-                document.getElementById('modal_hospital_cep').value = d.cep || '';
-                document.getElementById('modal_hospital_bairro').value = d.bairro || '';
-                document.getElementById('modal_hospital_municipio').value = d.municipio || '';
-                document.getElementById('modal_hospital_uf').value = d.uf || '';
-                console.log('Hospital encontrado:', d.nome_fantasia, '| UF:', d.uf);
-            })
-            .catch(function(err) {
-                console.error('Erro na busca CNPJ:', err);
-            });
+    var _timerModalCNPJ = null;
+    document.getElementById('modal_hospital_cnpj').addEventListener('input', function(e) {
+        clearTimeout(_timerModalCNPJ);
+        _timerModalCNPJ = setTimeout(function() {
+            var cnpj = e.target.value.replace(/\D/g, '');
+            if (!cnpj || cnpj.length !== 14) return;
+            fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
+                .then(function(r) {
+                    if (!r.ok) throw new Error('CNPJ nao encontrado');
+                    return r.json();
+                })
+                .then(function(d) {
+                    document.getElementById('modal_hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
+                    document.getElementById('modal_hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
+                    document.getElementById('modal_hospital_rua').value = d.logradouro || '';
+                    document.getElementById('modal_hospital_numero').value = d.numero || '';
+                    document.getElementById('modal_hospital_cep').value = d.cep || '';
+                    document.getElementById('modal_hospital_bairro').value = d.bairro || '';
+                    document.getElementById('modal_hospital_municipio').value = d.municipio || '';
+                    document.getElementById('modal_hospital_uf').value = d.uf || '';
+                    console.log('Busca CNPJ OK:', d.nome_fantasia, '| uf:', d.uf);
+                })
+                .catch(function(err) {
+                    console.error('Erro busca CNPJ:', err);
+                });
+        }, 500);
     });
 
     // ========== BUSCA CNPJ PRINCIPAL POR API (BrasilAPI) ==========
