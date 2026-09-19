@@ -754,6 +754,7 @@
         clearTimeout(_timerAutocomplete);
         _acIndex = -1;
         var termo = _acInput.value.trim();
+        console.log('INPUT DISPARADO:', termo, '| supabaseClient:', !!supabaseClient);
         if (termo.length < 2) { _acList.classList.remove('show'); _acList.innerHTML = ''; return; }
         if (!supabaseClient) { console.warn('Supabase nao conectado - autocomplete indisponivel'); return; }
         _timerAutocomplete = setTimeout(function() {
