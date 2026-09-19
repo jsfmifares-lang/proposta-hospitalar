@@ -498,7 +498,7 @@
             criado_em: new Date().toISOString()
         };
         localStorage.setItem('proposta_atual_capa', JSON.stringify(capa));
-        alert('Proposta ' + capa.numero_proposta + ' salva com sucesso!');
+        window.location.href = 'itens.html';
     });
 </script>
 </body>
