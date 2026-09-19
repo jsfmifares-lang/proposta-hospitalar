@@ -707,22 +707,10 @@
             }
 
             if (supabaseClient) {
-                supabaseClient.from('hospitais').select('*').eq('cnpj', cnpj).limit(1)
+                supabaseClient.from('hospitais').select('cnpj').eq('cnpj', cnpj).limit(1)
                     .then(function(r) {
                         if (r.error || !r.data || r.data.length === 0) { _buscarBrasilAPI(); return; }
-                        var h = r.data[0];
-                        if (!confirm('Já existe um hospital com este CNPJ. Deseja atualizar os dados dele?')) {
-                            _limparModal();
-                        } else {
-                            document.getElementById('modal_hospital_nome').value = h.nome || '';
-                            document.getElementById('modal_hospital_telefone').value = h.telefone || '';
-                            document.getElementById('modal_hospital_rua').value = h.rua || '';
-                            document.getElementById('modal_hospital_numero').value = h.numero || '';
-                            document.getElementById('modal_hospital_cep').value = h.cep || '';
-                            document.getElementById('modal_hospital_bairro').value = h.bairro || '';
-                            document.getElementById('modal_hospital_municipio').value = h.municipio || '';
-                            document.getElementById('modal_hospital_uf').value = h.uf || '';
-                        }
+                        _buscarBrasilAPI();
                     });
             } else {
                 _buscarBrasilAPI();
