@@ -711,16 +711,25 @@
                     .then(function(r) {
                         if (r.error) { console.error('Erro duplicidade:', r.error); return; }
                         if (r.data && r.data.length > 0) {
-                            var h = r.data[0];
                             if (confirm('Já existe um hospital com este CNPJ. Deseja atualizar os dados dele?')) {
-                                document.getElementById('modal_hospital_nome').value = h.nome || '';
-                                document.getElementById('modal_hospital_telefone').value = h.telefone || '';
-                                document.getElementById('modal_hospital_rua').value = h.rua || '';
-                                document.getElementById('modal_hospital_numero').value = h.numero || '';
-                                document.getElementById('modal_hospital_cep').value = h.cep || '';
-                                document.getElementById('modal_hospital_bairro').value = h.bairro || '';
-                                document.getElementById('modal_hospital_municipio').value = h.municipio || '';
-                                document.getElementById('modal_hospital_uf').value = h.uf || '';
+                                document.getElementById('modal_hospital_nome').value = '';
+                                document.getElementById('modal_hospital_telefone').value = '';
+                                document.getElementById('modal_hospital_rua').value = '';
+                                document.getElementById('modal_hospital_numero').value = '';
+                                document.getElementById('modal_hospital_cep').value = '';
+                                document.getElementById('modal_hospital_bairro').value = '';
+                                document.getElementById('modal_hospital_municipio').value = '';
+                                document.getElementById('modal_hospital_uf').value = '';
+                            } else {
+                                document.getElementById('modal_hospital_cnpj').value = '';
+                                document.getElementById('modal_hospital_nome').value = '';
+                                document.getElementById('modal_hospital_telefone').value = '';
+                                document.getElementById('modal_hospital_rua').value = '';
+                                document.getElementById('modal_hospital_numero').value = '';
+                                document.getElementById('modal_hospital_cep').value = '';
+                                document.getElementById('modal_hospital_bairro').value = '';
+                                document.getElementById('modal_hospital_municipio').value = '';
+                                document.getElementById('modal_hospital_uf').value = '';
                             }
                         }
                     });
