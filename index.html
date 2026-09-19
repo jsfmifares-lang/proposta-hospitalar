@@ -878,7 +878,6 @@
         if (!nome || !cnpj) { alert('Preencha nome e CNPJ.'); return; }
         var cnpjSoDigitos = cnpj.replace(/\D/g, '');
 
-        // Verifica duplicidade por CNPJ
         function _prosseguirCadastro() {
             supabaseClient.from('hospitais').upsert({
                 cnpj: cnpjSoDigitos,
@@ -892,8 +891,19 @@
                 uf: document.getElementById('modal_hospital_uf').value.trim()
             }, { onConflict: 'cnpj' })
                 .then(function(r) {
-                    if (r.error) { alert('Erro Supabase: ' + r.error.message); console.error('Erro Supabase:', r.error); }
-                    else { alert('Salvo OK!\nTelefone: ' + document.getElementById('modal_hospital_telefone').value + '\nRua: ' + document.getElementById('modal_hospital_rua').value + '\nCEP: ' + document.getElementById('modal_hospital_cep').value); }
+                    if (r.error) { alert('Erro Supabase: ' + r.error.message); console.error('Erro Supabase:', r.error); return; }
+                    document.getElementById('hospital_nome').value = nome;
+                    document.getElementById('hospital_cnpj').value = cnpj;
+                    document.getElementById('hospital_telefone').value = document.getElementById('modal_hospital_telefone').value;
+                    document.getElementById('hospital_rua').value = document.getElementById('modal_hospital_rua').value;
+                    document.getElementById('hospital_numero').value = document.getElementById('modal_hospital_numero').value;
+                    document.getElementById('hospital_cep').value = document.getElementById('modal_hospital_cep').value;
+                    document.getElementById('hospital_bairro').value = document.getElementById('modal_hospital_bairro').value;
+                    document.getElementById('hospital_municipio').value = document.getElementById('modal_hospital_municipio').value;
+                    document.getElementById('hospital_uf').value = document.getElementById('modal_hospital_uf').value.toUpperCase();
+                    document.getElementById('modalHospital').querySelectorAll('input').forEach(function(i) { i.value = ''; });
+                    fecharModal('modalHospital');
+                    alert('Hospital cadastrado com sucesso!');
                 });
         }
 
@@ -909,19 +919,6 @@
         } else {
             _prosseguirCadastro();
         }
-
-        document.getElementById('hospital_nome').value = nome;
-        document.getElementById('hospital_cnpj').value = cnpj;
-        document.getElementById('hospital_telefone').value = document.getElementById('modal_hospital_telefone').value;
-        document.getElementById('hospital_rua').value = document.getElementById('modal_hospital_rua').value;
-        document.getElementById('hospital_numero').value = document.getElementById('modal_hospital_numero').value;
-        document.getElementById('hospital_cep').value = document.getElementById('modal_hospital_cep').value;
-        document.getElementById('hospital_bairro').value = document.getElementById('modal_hospital_bairro').value;
-        document.getElementById('hospital_municipio').value = document.getElementById('modal_hospital_municipio').value;
-        document.getElementById('hospital_uf').value = document.getElementById('modal_hospital_uf').value.toUpperCase();
-        document.getElementById('modalHospital').querySelectorAll('input').forEach(function(i) { i.value = ''; });
-        fecharModal('modalHospital');
-        alert('Hospital cadastrado com sucesso!');
     }
 
     // ========== SALVAR MÉDICO ==========
