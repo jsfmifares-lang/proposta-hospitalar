@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Materiais - CotMed Pro</title>
+    <!-- Tailwind CSS para um design dark/cyberpunk de altíssimo nível comercial -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Biblioteca oficial do Supabase -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body class="bg-slate-950 p-6 min-h-screen text-slate-100 font-sans antialiased flex flex-col justify-center items-center">
+
+    <!-- Container Premium -->
+    <div class="w-full max-w-6xl bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden backdrop-blur-md">
+        
+        <!-- Header Modernizado com Identificação do Orçamento -->
+        <div class="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 px-6 py-4 flex justify-between items-center border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="h-3 w-3 rounded-full bg-cyan-400 animate-pulse"></div>
+                <h1 class="text-lg font-bold tracking-wide text-slate-200 uppercase">Inserir Itens da Proposta</h1>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800 font-mono text-xs text-cyan-400">
+                <span>Nº Pedido:</span>
+                <span id="label_numero_pedido">----------</span>
+            </div>
+        </div>
+
+        <!-- Painel de Inputs Operacionais -->
+        <div class="p-6 space-y-6">
+            
+            <!-- Bloco 1: Seleção Avançada de Material -->
+            <div class="grid grid-cols-12 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800/80">
+                <div class="col-span-3">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Referência</label>
+                    <input type="text" id="material_ref" placeholder="Digite a referência..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors uppercase">
+                </div>
+                <div class="col-span-6">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Descrição do Material</label>
+                    <input type="text" id="material_desc" placeholder="Nome ou especificação do material médico..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors uppercase">
+                </div>
+                <div class="col-span-3">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Fabricante</label>
+                    <input type="text" id="material_fab" placeholder="Ex: Johnson & Johnson" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors uppercase">
+                </div>
+            </div>
+
+            <!-- Bloco 2: Quantidades, Valores e Registro Comercial -->
+            <div class="grid grid-cols-10 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Quantidade</label>
+                    <input type="number" id="material_qtd" value="1" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-cyan-500 text-center">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Unidade</label>
+                    <select id="material_uni" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+                        <option>UNIDADE</option>
+                        <option>CAIXA</option>
+                        <option>PACOTE</option>
+                        <option>KIT</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Valor Unitário (R$)</label>
+                    <input type="number" step="0.01" id="material_v_unit" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-right text-emerald-400 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Sub-total</label>
+                    <input type="text" id="material_subtotal" class="w-full bg-slate-800/40 border border-slate-700 text-slate-400 font-mono text-right rounded-lg px-3 py-2 text-sm" readonly value="R$ 0,00">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Registro ANVISA</label>
+                    <input type="text" id="material_anvisa" placeholder="Ex: 10234567890" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 font-mono text-center">
+                </div>
+            </div>
+
+            <!-- Botões de Ação Rápida -->
+            <div class="flex gap-3 justify-start">
+                <button type="button" id="btn_inserir" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase px-6 py-2.5 rounded-lg shadow-md transition-all active:scale-95">
+                    Adicionar Item
+                </button>
+                <button type="button" id="btn_salvar_tudo" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase px-6 py-2.5 rounded-lg shadow-md transition-all active:scale-95">
+                    Gravar Proposta e Avançar
+                </button>
+            </div>
+
+            <!-- Resumo Financeiro da Cotação -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-0.5">Valor Total Acumulado</span>
+                    <span id="proposta_total_extenso" class="text-xs italic text-cyan-400/90 font-medium">( zero reais )</span>
+                </div>
+                <div class="bg-emerald-950/30 px-5 py-2 rounded-lg border border-emerald-800/50">
+                    <span id="proposta_total_num" class="text-xl font-mono font-bold text-emerald-400">R$ 0,00</span>
+                </div>
+            </div>
+
+            <!-- Tabela de Conferência dos Itens Adicionados -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-950/80 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                            <th class="p-3 text-center w-12">Item</th>
+                            <th class="p-3">Ref</th>
+                            <th class="p-3">Descrição</th>
+                            <th class="p-3">Fabricante</th>
+                            <th class="p-3 text-center">Qtd</th>
+                            <th class="p-3">Unid</th>
+                            <th class="p-3 text-right">Unitário</th>
+                            <th class="p-3 text-right">Subtotal</th>
+                            <th class="p-3 text-center w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela_itens_corpo" class="divide-y divide-slate-800/60 bg-slate-900/50">
+                        <tr>
+                            <td colspan="9" class="p-4 text-center text-slate-500 italic">Nenhum material inserido na lista ainda.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script de Processamento e Memória Local -->
+    <script>
+        // Carrega o número da proposta que foi gerado na tela index.html
+        const dadosCapa = JSON.parse(localStorage.getItem('proposta_atual_capa') || '{}');
+        if (dadosCapa.numero_proposta) {
+            document.getElementById('label_numero_pedido').innerText = dadosCapa.numero_proposta;
+        } else {
+            alert("Atenção: Dados da capa não encontrados. Volte para a primeira tela.");
+            window.location.href = 'index.html';
+        }
+
+        // Vetor na memória para gerenciar os itens adicionados na tabela antes do salvamento final
+        let itensDaProposta = [];
+
+        const inputQtd = document.getElementById('material_qtd');
+        const inputUnit = document.getElementById('material_v_unit');
+        const inputSub = document.getElementById('material_subtotal');
+
+        // Calcula dinamicamente o subtotal enquanto o digitador altera quantidade ou valor
+        function recalcularSubtotalItem() {
+            const qtd = parseInt(inputQtd.value) || 0;
+            const unit = parseFloat(inputUnit.value) || 0;
+            const sub = qtd * unit;
+            inputSub.value = sub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        inputQtd.addEventListener('input', recalcularSubtotalItem);
+        inputUnit.addEventListener('input', recalcularSubtotalItem);
+
+        // Atualiza a soma total do cabeçalho da proposta
+        function atualizarTotaisGerais() {
+            let total = 0;

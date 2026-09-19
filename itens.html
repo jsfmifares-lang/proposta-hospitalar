@@ -3,6 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Materiais - CotMed Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -390,7 +391,12 @@
 </div>
 
 <script>
-    // Recupera os dados da capa (tela index.html)
+    // ========== CONEXÃO SUPABASE ==========
+    const SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ========== DADOS DA CAPA ==========
     const dadosCapa = JSON.parse(localStorage.getItem('proposta_atual_capa') || '{}');
     if (dadosCapa.numero_proposta) {
         document.getElementById('label_numero_pedido').innerText = dadosCapa.numero_proposta;
@@ -455,7 +461,6 @@
             corpo.appendChild(tr);
         });
 
-        // Deleta item
         corpo.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idx = parseInt(e.target.getAttribute('data-index'));
@@ -483,7 +488,6 @@
         const subtotal = qtd * vUnit;
         itensDaProposta.push({ ref, desc, fab, qtd, uni, vUnit, subtotal, anvisa });
 
-        // Limpa campos
         document.getElementById('material_ref').value = '';
         document.getElementById('material_desc').value = '';
         document.getElementById('material_fab').value = '';
@@ -496,20 +500,41 @@
         atualizarTotaisGerais();
     });
 
-    // Salva tudo
-    document.getElementById('btn_salvar_tudo').addEventListener('click', () => {
+    // ========== SALVAR ITENS NO SUPABASE ==========
+    document.getElementById('btn_salvar_tudo').addEventListener('click', async () => {
         if (itensDaProposta.length === 0) {
             alert('Adicione pelo menos um item antes de gravar.');
             return;
         }
+
         let total = 0;
         itensDaProposta.forEach(item => total += item.subtotal);
+
         const propostaCompleta = {
+            numero_proposta: dadosCapa.numero_proposta,
             capa: dadosCapa,
             itens: itensDaProposta,
             total: total,
             gravado_em: new Date().toISOString()
         };
+
+        // Salva no Supabase (atualiza a proposta com os itens)
+        const { data, error } = await supabase
+            .from('propostas')
+            .upsert({
+                numero_proposta: dadosCapa.numero_proposta,
+                capa: dadosCapa,
+                itens: itensDaProposta,
+                total: total
+            })
+            .select();
+
+        if (error) {
+            alert('Erro ao salvar no banco: ' + error.message);
+            return;
+        }
+
+        // Salva no localStorage também
         localStorage.setItem('proposta_completa', JSON.stringify(propostaCompleta));
         alert('Proposta ' + dadosCapa.numero_proposta + ' gravada com sucesso!\nTotal: ' + total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
     });

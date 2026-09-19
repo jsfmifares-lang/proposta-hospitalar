@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta Comercial Hospitalar</title>
+    <!-- Tailwind CSS para estruturação rápida -->
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        /* Configuração para garantir que na impressão saia apenas a folha branca oficial */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: #ffffff; padding: 0; }
+            .print-page { border: none; shadow: none; margin: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 p-4 min-h-screen font-sans text-gray-800 flex flex-col items-center justify-start gap-4">
+
+    <!-- Barra de Ferramentas Superior (Não sai no PDF/Impressão) -->
+    <div class="w-full max-w-4xl bg-slate-900 border border-slate-800 p-4 rounded-xl flex justify-between items-center shadow-xl no-print">
+        <div class="flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Visualização da Proposta Pronta</span>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.location.href='inserir-material.html'" class="px-4 py-2 text-xs font-bold uppercase bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-all">
+                ← Voltar e Editar
+            </button>
+            <button onclick="window.print()" class="px-5 py-2 text-xs font-bold uppercase bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 shadow-md transition-all active:scale-95">
+                🖨️ Imprimir ou Salvar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- A FOLHA DA PROPOSTA COMERCIAL (Estilo Papel Timbrado Corporativo) -->
+    <div class="w-full max-w-4xl bg-white border border-gray-300 shadow-2xl p-8 rounded-sm print-page min-h-[1100px] flex flex-col justify-between">
+        
+        <div>
+            <!-- Cabeçalho do Papel Timbrado -->
+            <div class="flex justify-between items-start border-b-2 border-slate-700 pb-4 mb-6">
+                <div>
+                    <!-- Nome fictício do seu SaaS ou da distribuidora do seu cliente -->
+                    <h1 class="text-2xl font-black text-slate-900 uppercase tracking-tight">MEDSUPPLY</h1>
+                    <p class="text-[10px] text-gray-500 uppercase font-semibold">Distribuidora de Materiais Médicos e Hospitalares Ltda</p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-lg font-bold text-slate-800 uppercase">Proposta Comercial</h2>
+                    <p class="text-xs font-mono font-bold text-cyan-700">Nº <span id="pdf_numero_proposta">------</span></p>
+                    <p class="text-[10px] text-gray-400 mt-1" id="pdf_data_emissao">Data: --/--/----</p>
+                </div>
+            </div>
+
+            <!-- Bloco Destinatário / Dados do Hospital e Caso Clínico -->
+            <div class="grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded border border-gray-200 text-xs mb-6">
+                <div class="space-y-1">
+                    <p class="text-slate-500 font-bold uppercase text-[9px] tracking-wider">Cliente / Hospital</p>
+                    <p class="font-bold text-slate-900" id="pdf_hospital_nome">----------</p>
+                    <p class="text-gray-600">CNPJ: <span id="pdf_hospital_cnpj">--.---.---/----.--</span></p>
+                    <p class="text-gray-600">A/C: <span id="pdf_atencao_de">----------</span></p>
+                </div>
+                <div class="space-y-1 border-l border-gray-200 pl-6">
+                    <p class="text-slate-500 font-bold uppercase text-[9px] tracking-wider">Informações Clínicas</p>
+                    <p class="text-gray-700">Médico: <span class="font-bold text-slate-900" id="pdf_medico_nome">----------</span></p>
+                    <p class="text-gray-700">Paciente: <span class="font-bold text-slate-900" id="pdf_paciente_nome">----------</span></p>
+                    <p class="text-gray-700">Convênio: <span id="pdf_convenio_nome">----------</span></p>
+                </div>
+            </div>
+
+            <!-- Tabela Oficial de Itens Cotados -->
+            <table class="w-full text-left border-collapse text-[11px] mb-6">
+                <thead>
+                    <tr class="border-b border-slate-700 text-slate-900 font-bold uppercase bg-slate-100">
+                        <th class="p-2 text-center w-10">Item</th>
+                        <th class="p-2 w-28">Referência</th>
+                        <th class="p-2">Descrição do Material</th>
+                        <th class="p-2 w-24">Fabricante / Anvisa</th>
+                        <th class="p-2 text-center w-12">Qtd</th>
+                        <th class="p-2 w-12">Unid</th>
+                        <th class="p-2 text-right w-24">Val. Unitário</th>
+                        <th class="p-2 text-right w-24">Val. Total</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf_tabela_corpo" class="divide-y divide-gray-200">
+                    <!-- Gerado via JavaScript -->
+                </tbody>
+            </table>
+
+            <!-- Bloco de Fechamento de Valores -->
+            <div class="flex flex-col items-end gap-1 border-t border-gray-300 pt-4 mb-6">
+                <div class="text-right">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Valor Total da Proposta</span>
+                    <span class="text-lg font-mono font-black text-slate-900" id="pdf_valor_total_num">R$ 0,00</span>
+                </div>
+            </div>
+
+            <!-- Condições Comerciais e Observações do Pedido -->
+            <div class="border border-gray-200 rounded p-4 text-[10px] bg-slate-50 space-y-3">
+                <div class="grid grid-cols-3 gap-2 text-center font-semibold uppercase text-gray-600 divide-x divide-gray-200">
+                    <div>
+                        <p class="text-[8px] font-bold text-gray-400">Prazo de Entrega</p>
+                        <p id="pdf_prazo_entrega" class="text-slate-800 mt-0.5">---</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] font-bold text-gray-400">Condição de Pagamento</p>
+                        <p id="pdf_prazo_pagamento" class="text-slate-800 mt-0.5">---</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] font-bold text-gray-400">Validade da Proposta</p>
+                        <p id="pdf_validade_proposta" class="text-slate-800 mt-0.5">---</p>
+                    </div>
+                </div>
+                
+                <div id="pdf_wrapper_obs" class="border-t border-gray-200 pt-3">
+                    <p class="font-bold text-gray-500 uppercase text-[8px] tracking-wider mb-1">Observações Gerais:</p>
+                    <p id="pdf_observacoes" class="text-gray-700 leading-relaxed uppercase whitespace-pre-line"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé Corporativo Padrão -->
+        <div class="border-t border-gray-200 pt-4 mt-8 text-center text-[9px] text-gray-400 uppercase font-medium tracking-wide">
+            <p>Proposta gerada eletronicamente através da plataforma CotMed Pro.</p>
+            <p class="mt-0.5">Obrigado pela preferência e oportunidade de negócio.</p>
+        </div>
+
+    </div>
+
+    <!-- Script de Processamento e Renderização de Dados -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Puxa as informações gravadas em memória local
+            const capa = JSON.parse(localStorage.getItem('proposta_atual_capa') || '{}');
+            const itens = JSON.parse(localStorage.getItem('proposta_atual_itens') || '[]');
+
+            if (!capa.numero_proposta || itens.length === 0) {
+                alert("Erro ao montar o documento. Certifique-se de preencher a capa e os materiais.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Injeta a data atual formatada na folha
+            const hoje = new Date();
+            document.getElementById('pdf_data_emissao').innerText = `Data: ${hoje.toLocaleDateString('pt-BR')}`;
+
+            // Preenche as informações textuais da capa
+            document.getElementById('pdf_numero_proposta').innerText = capa.numero_proposta;
+            document.getElementById('pdf_hospital_nome').innerText = capa.hospital_nome || "NÃO INFORMADO";
+            document.getElementById('pdf_hospital_cnpj').innerText = capa.hospital_cnpj || "N/A";
+            document.getElementById('pdf_atencao_de').innerText = capa.atencao_de || "SETOR DE COMPRAS / OPME";
+            document.getElementById('pdf_medico_nome').innerText = capa.medico_nome || "N/A";
+            document.getElementById('pdf_paciente_nome').innerText = capa.paciente_nome || "N/A";
+            document.getElementById('pdf_convenio_nome').innerText = capa.convenio_nome || "CONVÊNIO PARTICULAR / SUS";
+
+            document.getElementById('pdf_prazo_entrega').innerText = capa.prazo_entrega;
+            document.getElementById('pdf_prazo_pagamento').innerText = capa.prazo_pagamento;
+            document.getElementById('pdf_validade_proposta').innerText = capa.validade_proposta;
+
+            if(capa.observacoes && capa.observacoes.trim() !== '') {
+                document.getElementById('pdf_observacoes').innerText = capa.observacoes;
+            } else {
+                document.getElementById('pdf_wrapper_obs').classList.add('hidden');
+            }
+
+            // Renderiza e calcula a lista de materiais na tabela impressa
+            const corpoTabela = document.getElementById('pdf_tabela_corpo');
+            corpoTabela.innerHTML = '';
+            let totalGeral = 0;
+

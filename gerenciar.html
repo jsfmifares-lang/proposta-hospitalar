@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Gerencial - CotMed Pro</title>
+    <!-- Tailwind CSS para um design dark/cyberpunk de alto nível -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Biblioteca oficial do Supabase -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body class="bg-slate-950 p-6 min-h-screen text-slate-100 font-sans antialiased flex flex-col justify-start items-center gap-6">
+
+    <!-- Menu Superior de Navegação -->
+    <div class="w-full max-w-6xl bg-slate-900 border border-slate-800 p-4 rounded-xl flex justify-between items-center shadow-xl">
+        <div class="flex items-center gap-3">
+            <div class="h-3 w-3 rounded-full bg-cyan-400"></div>
+            <h1 class="text-base font-bold tracking-wide text-slate-200 uppercase">CotMed Pro • Centro de Controle</h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="window.location.href='index.html'" class="px-4 py-2 text-xs font-bold uppercase bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 shadow-md transition-all active:scale-95">
+                + Nova Proposta
+            </button>
+        </div>
+    </div>
+
+    <!-- Abas de Navegação Gerencial -->
+    <div class="w-full max-w-6xl flex gap-2 border-b border-slate-800 pb-px">
+        <button id="tab_propostas" class="px-4 py-2 text-xs font-bold uppercase border-b-2 border-cyan-500 text-cyan-400 transition-colors">📄 Histórico de Propostas</button>
+        <button id="tab_cadastros" class="px-4 py-2 text-xs font-bold uppercase text-slate-400 hover:text-slate-200 transition-colors">👥 Médicos & Hospitais</button>
+    </div>
+
+    <!-- CONTAINER DA SEÇÃO 1: HISTÓRICO DE PROPOSTAS -->
+    <div id="secao_propostas" class="w-full max-w-6xl bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden">
+        <div class="p-4 bg-slate-950/60 border-b border-slate-800 flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Últimas Propostas Emitidas</span>
+            <input type="text" id="filtro_propostas" placeholder="Filtrar por nº ou paciente..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-cyan-500 text-slate-300 w-64">
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-950/80 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                        <th class="p-3">Nº Proposta</th>
+                        <th class="p-3">Hospital / Cliente</th>
+                        <th class="p-3">Paciente</th>
+                        <th class="p-3 text-right">Valor Total</th>
+                        <th class="p-3 text-center">Status</th>
+                        <th class="p-3 text-center w-28">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela_propostas_corpo" class="divide-y divide-slate-800/60 bg-slate-900/50">
+                    <!-- Gerado dinamicamente por JS -->
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-slate-500 italic">Carregando propostas salvas no banco...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- CONTAINER DA SEÇÃO 2: GERENCIAMENTO DE CADASTROS (INICIALMENTE OCULTO) -->
+    <div id="secao_cadastros" class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+        
+        <!-- Bloco de Médicos -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+            <div class="p-4 bg-slate-950/60 border-b border-slate-800 font-bold text-xs uppercase text-slate-300">👨‍⚕️ Médicos Cadastros</div>
+            <div class="p-4 space-y-4">
+                <div class="flex gap-2">
+                    <input type="text" id="cadastro_medico_nome" placeholder="Nome do Médico" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 uppercase">
+                    <input type="text" id="cadastro_medico_crm" placeholder="CRM" class="w-24 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 uppercase">
+                    <button id="btn_salvar_medico" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs px-4 rounded-lg uppercase">Adicionar</button>
+                </div>
+                <div class="max-h-60 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/40">
+                    <ul id="lista_medicos" class="divide-y divide-slate-800 text-xs p-2">
+                        <li class="p-2 text-slate-500 italic">Nenhum médico listado.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloco de Hospitais / Clientes -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+            <div class="p-4 bg-slate-950/60 border-b border-slate-800 font-bold text-xs uppercase text-slate-300">🏥 Hospitais cadastrados</div>
+            <div class="p-4 space-y-4">
+                <div class="flex gap-2">
+                    <input type="text" id="cadastro_hospital_nome" placeholder="Nome do Hospital" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 uppercase">
+                    <input type="text" id="cadastro_hospital_cnpj" placeholder="CNPJ" class="w-32 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500">
+                    <button id="btn_salvar_hospital" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs px-4 rounded-lg uppercase">Adicionar</button>
+                </div>
+                <div class="max-h-60 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/40">
+                    <ul id="lista_hospitais" class="divide-y divide-slate-800 text-xs p-2">
+                        <li class="p-2 text-slate-500 italic">Nenhum hospital listado.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lógica de Controle de Estado e Interface -->
+    <script>
+        // Elementos de alternância de abas
+        const tabPropostas = document.getElementById('tab_propostas');
+        const tabCadastros = document.getElementById('tab_cadastros');
+        const secaoPropostas = document.getElementById('secao_propostas');
+        const secaoCadastros = document.getElementById('secao_cadastros');
+
+        tabPropostas.addEventListener('click', () => {
+            tabPropostas.className = "px-4 py-2 text-xs font-bold uppercase border-b-2 border-cyan-500 text-cyan-400 transition-colors";
+            tabCadastros.className = "px-4 py-2 text-xs font-bold uppercase text-slate-400 hover:text-slate-200 transition-colors";
+            secaoPropostas.classList.remove('hidden');
+            secaoCadastros.classList.add('hidden');
+        });
+
+        tabCadastros.addEventListener('click', () => {
+            tabCadastros.className = "px-4 py-2 text-xs font-bold uppercase border-b-2 border-cyan-500 text-cyan-400 transition-colors";
+            tabPropostas.className = "px-4 py-2 text-xs font-bold uppercase text-slate-400 hover:text-slate-200 transition-colors";
+            secaoCadastros.classList.remove('hidden');
+            secaoPropostas.classList.add('hidden');
+            carregarListasCadastros(); // Atualiza os dados de apoio
+        });
+
+        // Simulação Dinâmica Local para demonstração rápida no OpenCode
+        let propostasExemplo = [
+            { numero: "1801248934", hospital: "CENTRO HOSPITALAR ALBERT SABIN", paciente: "MARIA DA SILVA SOUZA", total: 4250.00, status: "Pendente" },
+            { numero: "1801248999", hospital: "HOSPITAL SANTA JOANA", paciente: "CARLOS EDUARDO ROCHA", total: 11800.00, status: "Aprovada" }
+        ];
+
+        function renderizarTabelaPropostas() {
+            const corpo = document.getElementById('tabela_propostas_corpo');
+            corpo.innerHTML = '';
+
+            propostasExemplo.forEach(prop => {
+                const badgeColor = prop.status === 'Aprovada' ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-amber-950 text-amber-400 border-amber-800';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-cyan-400 font-bold">${prop.numero}</td>
+                    <td class="p-3 font-semibold text-slate-200">${prop.hospital}</td>
+                    <td class="p-3 text-slate-300">${prop.paciente}</td>
+                    <td class="p-3 text-right font-mono text-emerald-400 font-bold">${prop.total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full border text-[10px] uppercase font-bold ${badgeColor}">${prop.status}</span>
+                    </td>
+                    <td class="p-3 text-center flex justify-center gap-2">
+                        <button onclick="visualizarProposta('${prop.numero}')" class="text-cyan-400 hover:text-cyan-300 font-medium">Visualizar</button>
+                        <button onclick="alterarStatus('${prop.numero}')" class="text-slate-400 hover:text-slate-200">Alternar</button>
+                    </td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+        // Funções de Gerenciamento das Propostas
+        window.visualizarProposta = function(numero) {

@@ -3,6 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Informações Gerais - CotMed Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -402,9 +403,12 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "SUA_URL_DO_SUPABASE";
-    const SUPABASE_ANON_KEY = "SUA_CHAVE_ANON_PUBLICA";
+    // ========== CONEXÃO SUPABASE ==========
+    const SUPABASE_URL = "https://icbgvamsrxohyevknisf.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYmd2YW1zcnhvaHlldmtuaXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Njc0MjgsImV4cCI6MjEwNTM0MzQyOH0.-NpPeuobKustiDsr-ZBigNm6ubdTDhpI27kwhItMki0";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // ========== OBSERVAÇÕES ==========
     const checkboxObs = document.getElementById('com_observacoes');
     const wrapperObs = document.getElementById('wrapper_observacoes');
     function atualizarVisibilidadeObs() {
@@ -413,6 +417,7 @@
     checkboxObs.addEventListener('change', atualizarVisibilidadeObs);
     atualizarVisibilidadeObs();
 
+    // ========== SEM HOSPITAL ==========
     const checkboxSemHospital = document.getElementById('sem_hospital');
     const camposHospital = ['hospital_nome','hospital_cnpj','hospital_telefone','hospital_rua','hospital_numero','hospital_cep','hospital_bairro','hospital_municipio','hospital_uf'];
     checkboxSemHospital.addEventListener('change', () => {
@@ -426,6 +431,7 @@
         }
     });
 
+    // ========== NÚMERO PROPOSTA ==========
     function gerarNumeroProposta() {
         const agora = new Date();
         const data = agora.toISOString().slice(0, 10).replace(/-/g, '');
@@ -434,31 +440,39 @@
     }
     document.getElementById('numero_proposta').value = gerarNumeroProposta();
 
-    const bancoHospitais = [
-        { cnpj: '00000000000000', nome: 'CENTRO HOSPITALAR ALBERT SABIN', rua: 'RUA DAS FLORES', numero: '100', cep: '40000-000', bairro: 'CENTRO', municipio: 'SALVADOR', uf: 'BA', telefone: '(71) 3333-3333' }
-    ];
-    document.getElementById('busca_cnpj').addEventListener('change', (e) => {
+    // ========== BUSCA CNPJ PELO SUPABASE ==========
+    document.getElementById('busca_cnpj').addEventListener('change', async (e) => {
         const cnpj = e.target.value.replace(/\D/g, '');
-        const encontrado = bancoHospitais.find(h => h.cnpj === cnpj);
         const campoNome = document.getElementById('busca_nome_hospital');
-        if (encontrado) {
-            campoNome.value = encontrado.nome;
-            document.getElementById('hospital_nome').value = encontrado.nome;
-            document.getElementById('hospital_cnpj').value = e.target.value;
-            document.getElementById('hospital_telefone').value = encontrado.telefone;
-            document.getElementById('hospital_rua').value = encontrado.rua;
-            document.getElementById('hospital_numero').value = encontrado.numero;
-            document.getElementById('hospital_cep').value = encontrado.cep;
-            document.getElementById('hospital_bairro').value = encontrado.bairro;
-            document.getElementById('hospital_municipio').value = encontrado.municipio;
-            document.getElementById('hospital_uf').value = encontrado.uf;
-        } else if (cnpj) {
+
+        if (!cnpj) { campoNome.value = ''; return; }
+
+        campoNome.value = 'Buscando...';
+
+        const { data, error } = await supabase
+            .from('hospitais')
+            .select('*')
+            .eq('cnpj', cnpj)
+            .single();
+
+        if (error || !data) {
             campoNome.value = 'CNPJ NÃO LOCALIZADO (CADASTRE MANUALMENTE)';
-        } else {
-            campoNome.value = '';
+            return;
         }
+
+        campoNome.value = data.nome;
+        document.getElementById('hospital_nome').value = data.nome || '';
+        document.getElementById('hospital_cnpj').value = e.target.value;
+        document.getElementById('hospital_telefone').value = data.telefone || '';
+        document.getElementById('hospital_rua').value = data.rua || '';
+        document.getElementById('hospital_numero').value = data.numero || '';
+        document.getElementById('hospital_cep').value = data.cep || '';
+        document.getElementById('hospital_bairro').value = data.bairro || '';
+        document.getElementById('hospital_municipio').value = data.municipio || '';
+        document.getElementById('hospital_uf').value = data.uf || '';
     });
 
+    // ========== LIMPAR ==========
     document.getElementById('btnLimpar').addEventListener('click', () => {
         document.getElementById('formGerais').reset();
         checkboxSemHospital.checked = false;
@@ -471,8 +485,10 @@
         atualizarVisibilidadeObs();
     });
 
-    document.getElementById('formGerais').addEventListener('submit', (e) => {
+    // ========== SALVAR NO SUPABASE ==========
+    document.getElementById('formGerais').addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const capa = {
             numero_proposta: document.getElementById('numero_proposta').value,
             sem_hospital: checkboxSemHospital.checked,
@@ -497,6 +513,19 @@
             validade_proposta: document.getElementById('validade_proposta').value,
             criado_em: new Date().toISOString()
         };
+
+        // Salva no Supabase
+        const { data, error } = await supabase
+            .from('propostas')
+            .upsert({ numero_proposta: capa.numero_proposta, capa: capa })
+            .select();
+
+        if (error) {
+            alert('Erro ao salvar no banco: ' + error.message);
+            return;
+        }
+
+        // Salva no localStorage também (para a tela de itens)
         localStorage.setItem('proposta_atual_capa', JSON.stringify(capa));
         window.location.href = 'itens.html';
     });
