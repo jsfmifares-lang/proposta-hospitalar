@@ -658,7 +658,7 @@
         fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                document.getElementById('modal_hospital_nome').value = d.razao_social || d.nome || '';
+                document.getElementById('modal_hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
                 document.getElementById('modal_hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
                 document.getElementById('modal_hospital_rua').value = d.logradouro || '';
                 document.getElementById('modal_hospital_numero').value = d.numero || '';
@@ -681,8 +681,8 @@
         fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj)
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                campoNome.value = d.razao_social || d.nome || '';
-                document.getElementById('hospital_nome').value = d.razao_social || d.nome || '';
+                campoNome.value = d.nome_fantasia || d.razao_social || d.nome || '';
+                document.getElementById('hospital_nome').value = d.nome_fantasia || d.razao_social || d.nome || '';
                 document.getElementById('hospital_cnpj').value = e.target.value;
                 document.getElementById('hospital_telefone').value = d.ddd_telefone_1 || d.ddd_telefone_2 || '';
                 document.getElementById('hospital_rua').value = d.logradouro || '';
