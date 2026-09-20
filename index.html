@@ -436,10 +436,11 @@
 
         <!-- Médico / Paciente -->
         <div class="row">
-            <div class="col-4 field-with-btn">
+            <div class="col-4 field-with-btn autocomplete-wrapper">
                 <label class="label label-cyan">Médico Solicitante &#x1f4dd;</label>
-                <input type="text" id="medico_nome" placeholder="Nome do profissional de saúde...">
+                <input type="text" id="medico_nome" placeholder="Nome do profissional de saúde..." autocomplete="off">
                 <button type="button" class="btn-add" onclick="abrirModal('modalMedico')" title="Cadastrar Médico">+</button>
+                <div class="autocomplete-list" id="autocomplete_medicos"></div>
             </div>
             <div class="col-5">
                 <label class="label label-cyan">Nome Completo do Paciente</label>
@@ -454,10 +455,11 @@
 
         <!-- Dados Comerciais -->
         <div class="row">
-            <div class="col-4 field-with-btn">
+            <div class="col-4 field-with-btn autocomplete-wrapper">
                 <label class="label label-slate">Convênio Responsável</label>
-                <input type="text" id="convenio_nome" placeholder="Ex: UNIMED, BRADESCO...">
+                <input type="text" id="convenio_nome" placeholder="Ex: UNIMED, BRADESCO..." autocomplete="off">
                 <button type="button" class="btn-add" onclick="abrirModal('modalConvenio')" title="Cadastrar Convênio">+</button>
+                <div class="autocomplete-list" id="autocomplete_convenios"></div>
             </div>
             <div class="col-3">
                 <label class="label label-slate">Aos Cuidados De (A/C)</label>
@@ -825,6 +827,110 @@
 
     document.addEventListener('click', function(e) {
         if (!_acInput.contains(e.target) && !_acList.contains(e.target)) { _acList.classList.remove('show'); }
+    });
+
+    // ========== AUTOCOMPLETE MÉDICOS ==========
+    var _acMedTimer = null;
+    var _acMedIndex = -1;
+    var _acMedResults = [];
+    var _acMedInput = document.getElementById('medico_nome');
+    var _acMedList = document.getElementById('autocomplete_medicos');
+
+    _acMedInput.addEventListener('input', function() {
+        clearTimeout(_acMedTimer);
+        _acMedIndex = -1;
+        var termo = _acMedInput.value.trim();
+        if (termo.length < 2) { _acMedList.classList.remove('show'); _acMedList.innerHTML = ''; return; }
+        if (!supabaseClient) { return; }
+        _acMedTimer = setTimeout(function() {
+            supabaseClient.from('medicos').select('*').or('nome.ilike.%' + termo + '%,crm.ilike.%' + termo + '%').limit(10)
+                .then(function(result) {
+                    if (result.error || !result.data || result.data.length === 0) {
+                        _acMedList.innerHTML = '<div class="autocomplete-item" style="color:#64748b">Nenhum médico encontrado</div>';
+                        _acMedList.classList.add('show');
+                        _acMedResults = [];
+                        return;
+                    }
+                    _acMedResults = result.data;
+                    _acMedList.innerHTML = '';
+                    result.data.forEach(function(m) {
+                        var div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = '<strong>' + (m.nome || '') + '</strong> <small>CRM: ' + (m.crm || '') + ' - ' + (m.especialidade || '') + '</small>';
+                        div.addEventListener('click', function() {
+                            _acMedInput.value = m.nome || '';
+                            _acMedList.classList.remove('show');
+                        });
+                        _acMedList.appendChild(div);
+                    });
+                    _acMedList.classList.add('show');
+                });
+        }, 400);
+    });
+
+    _acMedInput.addEventListener('keydown', function(e) {
+        var items = _acMedList.querySelectorAll('.autocomplete-item');
+        if (!_acMedList.classList.contains('show') || items.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); _acMedIndex = Math.min(_acMedIndex + 1, items.length - 1); items.forEach(function(it, i) { it.classList.toggle('active', i === _acMedIndex); }); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); _acMedIndex = Math.max(_acMedIndex - 1, 0); items.forEach(function(it, i) { it.classList.toggle('active', i === _acMedIndex); }); }
+        else if (e.key === 'Enter' && _acMedIndex >= 0) { e.preventDefault(); _acMedInput.value = _acMedResults[_acMedIndex].nome || ''; _acMedList.classList.remove('show'); }
+        else if (e.key === 'Escape') { _acMedList.classList.remove('show'); }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!_acMedInput.contains(e.target) && !_acMedList.contains(e.target)) { _acMedList.classList.remove('show'); }
+    });
+
+    // ========== AUTOCOMPLETE CONVÊNIOS ==========
+    var _acConvTimer = null;
+    var _acConvIndex = -1;
+    var _acConvResults = [];
+    var _acConvInput = document.getElementById('convenio_nome');
+    var _acConvList = document.getElementById('autocomplete_convenios');
+
+    _acConvInput.addEventListener('input', function() {
+        clearTimeout(_acConvTimer);
+        _acConvIndex = -1;
+        var termo = _acConvInput.value.trim();
+        if (termo.length < 2) { _acConvList.classList.remove('show'); _acConvList.innerHTML = ''; return; }
+        if (!supabaseClient) { return; }
+        _acConvTimer = setTimeout(function() {
+            supabaseClient.from('convenios').select('*').or('nome.ilike.%' + termo + '%,cnpj.ilike.%' + termo + '%').limit(10)
+                .then(function(result) {
+                    if (result.error || !result.data || result.data.length === 0) {
+                        _acConvList.innerHTML = '<div class="autocomplete-item" style="color:#64748b">Nenhum convênio encontrado</div>';
+                        _acConvList.classList.add('show');
+                        _acConvResults = [];
+                        return;
+                    }
+                    _acConvResults = result.data;
+                    _acConvList.innerHTML = '';
+                    result.data.forEach(function(c) {
+                        var div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = '<strong>' + (c.nome || '') + '</strong> <small>CNPJ: ' + (c.cnpj || '') + '</small>';
+                        div.addEventListener('click', function() {
+                            _acConvInput.value = c.nome || '';
+                            _acConvList.classList.remove('show');
+                        });
+                        _acConvList.appendChild(div);
+                    });
+                    _acConvList.classList.add('show');
+                });
+        }, 400);
+    });
+
+    _acConvInput.addEventListener('keydown', function(e) {
+        var items = _acConvList.querySelectorAll('.autocomplete-item');
+        if (!_acConvList.classList.contains('show') || items.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); _acConvIndex = Math.min(_acConvIndex + 1, items.length - 1); items.forEach(function(it, i) { it.classList.toggle('active', i === _acConvIndex); }); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); _acConvIndex = Math.max(_acConvIndex - 1, 0); items.forEach(function(it, i) { it.classList.toggle('active', i === _acConvIndex); }); }
+        else if (e.key === 'Enter' && _acConvIndex >= 0) { e.preventDefault(); _acConvInput.value = _acConvResults[_acConvIndex].nome || ''; _acConvList.classList.remove('show'); }
+        else if (e.key === 'Escape') { _acConvList.classList.remove('show'); }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!_acConvInput.contains(e.target) && !_acConvList.contains(e.target)) { _acConvList.classList.remove('show'); }
     });
 
     // ========== OBSERVAÇÕES ==========
