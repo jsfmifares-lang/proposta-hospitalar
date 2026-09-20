@@ -913,13 +913,13 @@
     function salvarMedico() {
         var nome = document.getElementById('modal_medico_nome').value.trim();
         if (!nome) { alert('Preencha o nome do médico.'); return; }
-        if (!supabaseClient) { alert('Supabase não conectado'); return; }
+        if (!supabaseClient) return;
         supabaseClient.from('medicos').upsert({
             nome: nome,
             crm: document.getElementById('modal_medico_crm').value.trim(),
             especialidade: document.getElementById('modal_medico_especialidade').value.trim()
         }).then(function(r) {
-            if (r.error) { alert('Erro Supabase: ' + r.error.message); return; }
+            if (r.error) { alert('Erro: ' + r.error.message); return; }
             document.getElementById('medico_nome').value = nome;
             document.getElementById('modalMedico').querySelectorAll('input').forEach(function(i) { i.value = ''; });
             fecharModal('modalMedico');
@@ -931,13 +931,13 @@
     function salvarConvenio() {
         var nome = document.getElementById('modal_convenio_nome').value.trim();
         if (!nome) { alert('Preencha o nome do convênio.'); return; }
-        if (!supabaseClient) { alert('Supabase não conectado'); return; }
+        if (!supabaseClient) return;
         supabaseClient.from('convenios').upsert({
             nome: nome,
             cnpj: document.getElementById('modal_convenio_cnpj').value.trim().replace(/\D/g, ''),
             telefone: document.getElementById('modal_convenio_telefone').value.trim()
         }).then(function(r) {
-            if (r.error) { alert('Erro Supabase: ' + r.error.message); return; }
+            if (r.error) { alert('Erro: ' + r.error.message); return; }
             document.getElementById('convenio_nome').value = nome;
             document.getElementById('modalConvenio').querySelectorAll('input').forEach(function(i) { i.value = ''; });
             fecharModal('modalConvenio');
